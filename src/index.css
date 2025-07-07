@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply font-sans bg-white text-gray-900;
+}
+
+.wave {
+  position: absolute;
+  bottom: -0.25rem; /* Adjusted to match new height */
+  left: 0;
+  height: 5.5rem; /* Was 11rem, now 50% */
+  width: 100%;
+  background: url('/src/assets/wave.png');
+  background-size: 100rem 5.5rem; /* Match height */
+  background-repeat: repeat-x;
+  animation: waves 8s linear infinite;
+}
+
+.wave2 {
+  animation-direction: reverse;
+  animation-duration: 6s;
+  opacity: 0.3;
+}
+
+.wave3 {
+  animation-duration: 4s;
+  opacity: 0.5;
+}
+
+@keyframes waves {
+  0% {
+    background-position-x: 0;
+  }
+  100% {
+    background-position-x: 100rem;
+  }
+}
+.border-title::before,
+.border-title::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #1D4ED8;
+}
+
+.border-title::before {
+  top: -10px;
+  left: -10px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.border-title::after {
+  bottom: -10px;
+  right: -10px;
+  border-top: none;
+  border-left: none;
+}
