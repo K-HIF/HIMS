@@ -24,7 +24,7 @@ const Departments = () => {
     dateFormed: '',
   });
 
-  const [departments, setDepartments] = useState<Department[]>([
+  const [departments] = useState<Department[]>([
     {
       name: 'Cardiology',
       email: 'cardio@hospital.com',
@@ -32,8 +32,8 @@ const Departments = () => {
       staffCount: '25',
       dateFormed: '2015-09-01',
     },
-    // Add more departments if needed
   ]);
+
 
   const handleEditClick = (dept: Department) => {
     setIsEditMode(true);

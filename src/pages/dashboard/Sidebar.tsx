@@ -1,4 +1,3 @@
-// src/components/Sidebar.tsx
 import React from 'react';
 import {
   LayoutDashboard,
@@ -20,6 +19,11 @@ type SidebarItem = {
   route: string;
 };
 
+type SidebarProps = {
+  selectedPage: string;
+  onSelect: (page: string) => void;
+};
+
 const mainNavItems: SidebarItem[] = [
   { label: 'Dashboard', icon: <LayoutDashboard size={18} />, route: '/dashboard' },
   { label: 'Doctors', icon: <User size={18} />, route: '/dashboard/doctors' },
@@ -36,7 +40,7 @@ const accountItems: SidebarItem[] = [
   { label: 'Documentation', icon: <FileText size={18} />, route: '/dashboard/documentation' },
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ selectedPage, onSelect }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,9 +61,12 @@ const Sidebar: React.FC = () => {
         {mainNavItems.map((item, idx) => (
           <li
             key={idx}
-            onClick={() => navigate(item.route)}
+            onClick={() => {
+              onSelect(item.label);
+              navigate(item.route);
+            }}
             className={`flex items-center gap-3 px-2 py-2 rounded-md cursor-pointer ${
-              location.pathname === item.route
+              selectedPage === item.label || location.pathname === item.route
                 ? 'bg-blue-100 text-blue-600 font-medium'
                 : 'hover:bg-gray-100'
             }`}
@@ -77,11 +84,14 @@ const Sidebar: React.FC = () => {
           {accountItems.map((item, idx) => (
             <li
               key={idx}
-              onClick={() => navigate(item.route)}
+              onClick={() => {
+                onSelect(item.label);
+                navigate(item.route);
+              }}
               className={`flex items-center gap-3 px-2 py-2 rounded-md cursor-pointer ${
                 item.label === 'Log Out'
                   ? 'text-red-500 hover:text-red-700'
-                  : location.pathname === item.route
+                  : selectedPage === item.label || location.pathname === item.route
                   ? 'bg-blue-100 text-blue-600 font-medium'
                   : 'hover:bg-gray-100'
               }`}

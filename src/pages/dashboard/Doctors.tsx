@@ -6,21 +6,31 @@ type ContextType = {
   searchTerm: string;
 };
 
+type Doctor = {
+  name: string;
+  email: string;
+  dept: string;
+  status: string;
+  employed: string;
+  avatar: string;
+};
+
 const Doctors = () => {
   const { searchTerm } = useOutletContext<ContextType>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<Doctor>({
     name: '',
     email: '',
     dept: '',
     status: 'Active',
     employed: '',
+    avatar: '',
   });
 
-  const doctors = [
+  const doctors: Doctor[] = [
     {
       name: 'Dr. John Doe',
       email: 'john.doe@email.com',
@@ -40,10 +50,12 @@ const Doctors = () => {
   ];
 
   const filteredDoctors = doctors.filter((doc) =>
-    `${doc.name} ${doc.email}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${doc.name} ${doc.email}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
 
-  const handleEditClick = (doctor) => {
+  const handleEditClick = (doctor: Doctor) => {
     setIsEditMode(true);
     setEditData({ ...doctor });
     setIsModalOpen(true);
@@ -57,6 +69,7 @@ const Doctors = () => {
       dept: '',
       status: 'Active',
       employed: '',
+      avatar: '',
     });
     setIsModalOpen(true);
   };
@@ -65,7 +78,9 @@ const Doctors = () => {
     setIsModalOpen(false);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
@@ -144,7 +159,73 @@ const Doctors = () => {
               {isEditMode ? 'Edit Doctor Info' : 'Add Doctor'}
             </h2>
             <form className="space-y-4">
-              {/* Add form fields here */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={editData.email}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  name="dept"
+                  value={editData.dept}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Status
+                </label>
+                <select
+                  name="status"
+                  value={editData.status}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Employed Year
+                </label>
+                <input
+                  type="text"
+                  name="employed"
+                  value={editData.employed}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+
               <div className="flex justify-end pt-4">
                 <button
                   type="button"

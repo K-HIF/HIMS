@@ -6,21 +6,31 @@ type ContextType = {
   searchTerm: string;
 };
 
+type Program = {
+  name: string;
+  email: string;
+  program: string;
+  status: string;
+  startYear: string;
+  avatar: string;
+};
+
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<Program>({
     name: '',
     email: '',
     program: '',
     status: 'Active',
     startYear: '',
+    avatar: '',
   });
 
-  const programs = [
+  const programs: Program[] = [
     {
       name: 'Medicare Advantage',
       email: 'contact@medicare.com',
@@ -40,12 +50,10 @@ const Programs = () => {
   ];
 
   const filteredPrograms = programs.filter((p) =>
-    `${p.name} ${p.email}`
-      .toLowerCase()
-      .includes((searchTerm ?? '').toLowerCase())
+    `${p.name} ${p.email}`.toLowerCase().includes((searchTerm ?? '').toLowerCase())
   );
 
-  const handleEditClick = (program) => {
+  const handleEditClick = (program: Program) => {
     setIsEditMode(true);
     setEditData({ ...program });
     setIsModalOpen(true);
@@ -59,6 +67,7 @@ const Programs = () => {
       program: '',
       status: 'Active',
       startYear: '',
+      avatar: '',
     });
     setIsModalOpen(true);
   };
@@ -67,7 +76,9 @@ const Programs = () => {
     setIsModalOpen(false);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
@@ -87,7 +98,7 @@ const Programs = () => {
         </div>
       </div>
 
-      {/* Table Card */}
+      {/* Table */}
       <div className="mt-[-40px] w-[108%] bg-white shadow-md rounded-md px-6 py-8 z-10 relative">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -146,35 +157,58 @@ const Programs = () => {
               {isEditMode ? 'Edit Program Info' : 'Add Program'}
             </h2>
             <form className="space-y-4">
-              {/* Example Input Fields */}
-              <input
-                name="name"
-                value={editData.name}
-                onChange={handleChange}
-                placeholder="Program Name"
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                name="email"
-                value={editData.email}
-                onChange={handleChange}
-                placeholder="Email"
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                name="program"
-                value={editData.program}
-                onChange={handleChange}
-                placeholder="Type"
-                className="w-full border px-3 py-2 rounded"
-              />
-              <input
-                name="startYear"
-                value={editData.startYear}
-                onChange={handleChange}
-                placeholder="Start Year"
-                className="w-full border px-3 py-2 rounded"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Program Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editData.name}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={editData.email}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Type</label>
+                <input
+                  type="text"
+                  name="program"
+                  value={editData.program}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <select
+                  name="status"
+                  value={editData.status}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Start Year</label>
+                <input
+                  type="text"
+                  name="startYear"
+                  value={editData.startYear}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                />
+              </div>
               <div className="flex justify-end pt-4">
                 <button
                   type="button"

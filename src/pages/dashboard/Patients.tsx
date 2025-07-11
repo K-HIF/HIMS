@@ -6,22 +6,33 @@ type ContextType = {
   searchTerm: string;
 };
 
+type Patient = {
+  name: string;
+  id: string;
+  phone: string;
+  dob: string;
+  visits: string;
+  insurance: string;
+  avatar: string;
+};
+
 const Patients = () => {
   const { searchTerm } = useOutletContext<ContextType>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [editData, setEditData] = useState({
+  const [editData, setEditData] = useState<Patient>({
     name: '',
     id: '',
     phone: '',
     dob: '',
     visits: '',
     insurance: '',
+    avatar: '',
   });
 
-  const patients = [
+  const patients: Patient[] = [
     {
       name: 'Jane Smith',
       id: 'P123456',
@@ -46,7 +57,7 @@ const Patients = () => {
     `${patient.name} ${patient.id}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleEditClick = (patient) => {
+  const handleEditClick = (patient: Patient) => {
     setIsEditMode(true);
     setEditData({ ...patient });
     setIsModalOpen(true);
@@ -61,6 +72,7 @@ const Patients = () => {
       dob: '',
       visits: '',
       insurance: '',
+      avatar: '',
     });
     setIsModalOpen(true);
   };
@@ -69,13 +81,13 @@ const Patients = () => {
     setIsModalOpen(false);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 pt-1 relative flex flex-col items-center">
-      {/* Title Block with Add Button */}
+      {/* Title Block */}
       <div className="w-[103%] bg-gradient-to-r from-black to-gray-700 shadow-lg px-10 py-6 rounded-md z-20 relative">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-semibold text-white">The Patients</h1>
@@ -89,7 +101,7 @@ const Patients = () => {
         </div>
       </div>
 
-      {/* White Table Card */}
+      {/* Table */}
       <div className="mt-[-40px] w-[108%] bg-white shadow-md rounded-md px-6 py-8 z-10 relative">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -150,8 +162,68 @@ const Patients = () => {
               {isEditMode ? 'Edit Patient Info' : 'Add Patient'}
             </h2>
             <form className="space-y-4">
-              {/* All the input fields for the modal */}
-              {/* ... [same as before] */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={editData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">ID</label>
+                <input
+                  type="text"
+                  name="id"
+                  value={editData.id}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone No</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={editData.phone}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">DOB</label>
+                <input
+                  type="date"
+                  name="dob"
+                  value={editData.dob}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Number of Visits</label>
+                <input
+                  type="number"
+                  name="visits"
+                  value={editData.visits}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Insurance</label>
+                <select
+                  name="insurance"
+                  value={editData.insurance}
+                  onChange={handleChange}
+                  className="mt-1 block w-full border rounded-md p-2 text-sm"
+                >
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
               <div className="flex justify-end pt-4">
                 <button
                   type="button"
