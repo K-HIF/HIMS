@@ -1,0 +1,277 @@
+/* Scrollable main content */
+.overview-container {
+  font-family: 'Arial', sans-serif;
+  padding-bottom: 2rem;
+}
+
+/* Titles */
+.overview-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.overview-subtitle {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* First 4 stat cards in one row */
+.overview-cards-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.overview-cards-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Each stat card */
+.overview-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  flex: 1;
+  min-width: 220px;
+  max-width: 25%; /* Ensures 4 cards in 1 row */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.card-value {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-top: 0.25rem;
+}
+
+.card-icon {
+  font-size: 2rem;
+  color: #4caf50;
+}
+
+.card-divider {
+  margin: 0.75rem 0;
+  border: none;
+  height: 1px;
+  background: #eee;
+}
+
+.card-footer-text {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+/* Chart row styling */
+.charts-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.charts-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chart-card {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-width: 280px;
+  max-width: 32%;
+}
+
+.chart-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.chart-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 1rem;
+}
+
+.chart-container {
+  height: 170px;
+  width: 100%;
+}
+
+.chart-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.chart-footer-text {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.text-success {
+  color: green;
+}
+
+.text-warning {
+  color: orange;
+}
+
+.summary-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.system-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  width: 32%;
+  min-width: 250px;
+}
+
+.system-card .chart-title {
+  margin-bottom: 0.3rem;
+}
+
+.system-card .chart-subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.system-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.system-icon {
+  font-size: 1.6rem;
+  color: #1976d2;
+  background-color: #f1f8ff;
+  border-radius: 50%;
+  padding: 0.5rem;
+}
+
+.system-details {
+  flex-grow: 1;
+}
+
+.system-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.system-change {
+  font-size: 0.8rem;
+}
+
+.text-success {
+  color: #2e7d32;
+}
+
+.text-warning {
+  color: #f9a825;
+}
+
+.summary-system-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Table stays 2/3 width (like two chart cards) */
+.summary-table-wrapper {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  flex: 2;
+  min-width: 0;
+}
+
+/* System card matches one chart card */
+.system-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  flex: 1;
+  min-width: 250px;
+}
+/* Table styling */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.summary-table th,
+.summary-table td {
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.summary-table th {
+  font-weight: 600;
+  color: #444;
+}
+
+.dept-icon {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  vertical-align: middle;
+  color: #4caf50;
+}
+
+.member-images {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.member-images img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Scroll area */
+.summary-table-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.summary-table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
