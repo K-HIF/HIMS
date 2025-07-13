@@ -15,10 +15,9 @@ const Departments = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-  const detailModalRef = useRef<HTMLDivElement>(null);
 
   const [editData, setEditData] = useState<Department>({
     name: '',
@@ -28,7 +27,7 @@ const Departments = () => {
     dateFormed: '',
   });
 
-  const [departments] = useState<Department[]>([
+  const departments: Department[] = [
     {
       name: 'Cardiology',
       email: 'cardio@hospital.com',
@@ -36,28 +35,36 @@ const Departments = () => {
       staffCount: '25',
       dateFormed: '2015-09-01',
     },
-  ]);
+  ];
+
+  const filteredDepartments = departments.filter((dept) =>
+    `${dept.name} ${dept.email} ${dept.head}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 640px)');
-    const handleResize = () => setIsSmallScreen(mediaQuery.matches);
+    const mq = window.matchMedia('(max-width: 640px)');
+    const handleResize = () => setIsSmallScreen(mq.matches);
     handleResize();
-    mediaQuery.addEventListener('change', handleResize);
-    return () => mediaQuery.removeEventListener('change', handleResize);
+    mq.addEventListener('change', handleResize);
+    return () => mq.removeEventListener('change', handleResize);
   }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         setIsModalOpen(false);
-      }
-      if (detailModalRef.current && !detailModalRef.current.contains(event.target as Node)) {
         setSelectedDept(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isModalOpen || selectedDept) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isModalOpen, selectedDept]);
 
   const handleEditClick = (dept: Department) => {
     setIsEditMode(true);
@@ -73,24 +80,19 @@ const Departments = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setSelectedDept(null);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  const filteredDepartments = departments.filter((dept) =>
-    [dept.name, dept.email, dept.head].some((field) =>
-      field.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
   return (
-    <div className="min-h-screen bg-gray-100 px-4 pt-4 flex flex-col items-center w-full">
+    <div className="min-h-screen bg-gray-100 px-4 pt-1 flex flex-col items-center w-full">
       {/* Header */}
       <div className="w-full max-w-[92rem] bg-gradient-to-r from-black to-gray-700 shadow-lg px-4 sm:px-10 py-6 rounded-md mt-4 z-20">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-white">The Departments</h1>
+          <h1 className="text-xl font-semibold text-white">Departments</h1>
           <button
             onClick={handleAddClick}
             className="flex items-center gap-2 text-green-400 hover:text-green-200 font-medium"
@@ -101,7 +103,7 @@ const Departments = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table View */}
       {!isSmallScreen && (
         <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px]">
@@ -115,50 +117,42 @@ const Departments = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredDepartments.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="text-center py-6 text-gray-500">
-                    No departments found.
+              {filteredDepartments.map((dept, idx) => (
+                <tr key={idx} className="hover:bg-gray-50 border-b">
+                  <td className="py-4 px-4">
+                    <div className="flex items-start gap-3">
+                      <Building className="text-gray-700 mt-1" size={24} />
+                      <div>
+                        <div className="font-medium text-gray-800">{dept.name}</div>
+                        <div className="text-sm text-gray-500">{dept.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">{dept.head}</td>
+                  <td className="py-4 px-4">{dept.staffCount}</td>
+                  <td className="py-4 px-4">{dept.dateFormed}</td>
+                  <td className="py-4 px-4">
+                    <button
+                      onClick={() => handleEditClick(dept)}
+                      className="text-blue-500 hover:text-blue-700 transform transition-transform duration-200 hover:scale-110"
+                    >
+                      <Pencil size={18} />
+                    </button>
                   </td>
                 </tr>
-              ) : (
-                filteredDepartments.map((dept, index) => (
-                  <tr key={index} className="hover:bg-gray-50 border-b">
-                    <td className="py-4 px-4">
-                      <div className="flex items-start gap-3">
-                        <Building className="text-gray-700 mt-1" size={24} />
-                        <div>
-                          <div className="font-medium text-gray-800">{dept.name}</div>
-                          <div className="text-sm text-gray-500">{dept.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">{dept.head}</td>
-                    <td className="py-4 px-4">{dept.staffCount}</td>
-                    <td className="py-4 px-4">{dept.dateFormed}</td>
-                    <td className="py-4 px-4">
-                      <button
-                        onClick={() => handleEditClick(dept)}
-                        className="text-blue-500 hover:text-blue-700 transform transition-transform duration-200 hover:scale-110"
-                      >
-                        <Pencil size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Small screen list view */}
+      {/* Mobile List View */}
       {isSmallScreen && (
         <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-6 flex flex-col gap-4">
           <h2 className="text-lg font-semibold mb-3">Departments List</h2>
           <ul className="space-y-2">
-            {filteredDepartments.map((dept, index) => (
-              <li key={index}>
+            {filteredDepartments.map((dept, idx) => (
+              <li key={idx}>
                 <button
                   onClick={() => setSelectedDept(dept)}
                   className="w-full text-left text-blue-600 hover:underline"
@@ -171,79 +165,39 @@ const Departments = () => {
         </div>
       )}
 
-      {/* Detail modal for small screen */}
-      {selectedDept && (
+      {/* Shared Modal */}
+      {(isModalOpen || selectedDept) && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
-          <div ref={detailModalRef} className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
-            <button
-              onClick={() => setSelectedDept(null)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-            >
-              <X size={20} />
-            </button>
-            <div className="text-center space-y-2">
-              <Building className="text-gray-700 mb-2 mx-auto" size={40} />
-              <h3 className="text-xl font-semibold">{selectedDept.name}</h3>
-              <p className="text-sm text-gray-500">{selectedDept.email}</p>
-              <p><strong>Head:</strong> {selectedDept.head}</p>
-              <p><strong>Staff Count:</strong> {selectedDept.staffCount}</p>
-              <p><strong>Date Formed:</strong> {selectedDept.dateFormed}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
-          <div
-            ref={modalRef}
-            className="bg-white w-full max-w-sm p-6 rounded-lg shadow-lg relative"
-          >
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-            >
+          <div ref={modalRef} className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
+            <button onClick={handleCloseModal} className="absolute top-3 right-3 text-gray-500 hover:text-red-500">
               <X size={20} />
             </button>
             <h2 className="text-xl font-semibold mb-4">
-              {isEditMode ? 'Edit Department' : 'Add Department'}
+              {isEditMode ? 'Edit Department' : selectedDept ? 'Department Details' : 'Add Department'}
             </h2>
-            <form className="space-y-4">
-              {['name', 'email', 'head', 'staffCount', 'dateFormed'].map((field) => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 capitalize">
-                    {field === 'staffCount'
-                      ? 'No. of Staff'
-                      : field === 'dateFormed'
-                      ? 'Date Formed'
-                      : field}
-                  </label>
-                  <input
-                    type={
-                      field === 'dateFormed'
-                        ? 'date'
-                        : field === 'staffCount'
-                        ? 'number'
-                        : 'text'
-                    }
-                    name={field}
-                    value={editData[field as keyof Department]}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border rounded-md p-2 text-sm"
-                  />
-                </div>
-              ))}
-              <div className="flex justify-end pt-4">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
-                >
-                  {isEditMode ? 'Save Changes' : 'Add Department'}
-                </button>
+            {selectedDept ? (
+              <div className="space-y-2 text-center">
+                <Building className="text-gray-700 mb-2 mx-auto" size={40} />
+                <div className="font-medium text-gray-800 text-lg">{selectedDept.name}</div>
+                <div className="text-sm text-gray-500">{selectedDept.email}</div>
+                <p><strong>Head:</strong> {selectedDept.head}</p>
+                <p><strong>No. of Staff:</strong> {selectedDept.staffCount}</p>
+                <p><strong>Date Formed:</strong> {selectedDept.dateFormed}</p>
               </div>
-            </form>
+            ) : (
+              <form className="space-y-4">
+                <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Name" className="w-full border rounded-md px-3 py-2" />
+                <input type="email" name="email" value={editData.email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" />
+                <input type="text" name="head" value={editData.head} onChange={handleChange} placeholder="Head of Department" className="w-full border rounded-md px-3 py-2" />
+                <input type="number" name="staffCount" value={editData.staffCount} onChange={handleChange} placeholder="Staff Count" className="w-full border rounded-md px-3 py-2" />
+                <input type="date" name="dateFormed" value={editData.dateFormed} onChange={handleChange} className="w-full border rounded-md px-3 py-2" />
+                <div className="flex justify-end pt-4">
+                  <button type="button" onClick={handleCloseModal} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
+                    {isEditMode ? 'Save Changes' : 'Add Department'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
