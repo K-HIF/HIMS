@@ -169,7 +169,7 @@ const Programs = () => {
 
       {/* Mobile List View (small screen) */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-6 flex flex-col gap-4">
+        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
           <h2 className="text-lg font-semibold mb-3">Programs List</h2>
           <ul className="space-y-2">
             {filteredPrograms.map((p, idx) => (

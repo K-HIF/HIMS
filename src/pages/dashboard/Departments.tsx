@@ -105,7 +105,7 @@ const Departments = () => {
 
       {/* Table View */}
       {!isSmallScreen && (
-        <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
+        <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-12 overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b">
@@ -148,7 +148,7 @@ const Departments = () => {
 
       {/* Mobile List View */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-6 flex flex-col gap-4">
+        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
           <h2 className="text-lg font-semibold mb-3">Departments List</h2>
           <ul className="space-y-2">
             {filteredDepartments.map((dept, idx) => (
