@@ -1,4 +1,8 @@
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import Home from './pages/Home';
 import DashboardLayout from './pages/DashboardLayout';
 import NotFound from './pages/NotFound';
@@ -15,25 +19,28 @@ import Documentation from './pages/dashboard/Documentation';
 
 const App = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
+    <>
+      <Routes>
+        <Route path="/" element={<Home />} />
 
-      <Route path="/dashboard" element={<DashboardLayout />}>
-      
-        <Route index element={<Overview />} />
-        <Route path="doctors" element={<Doctors />} />
-        <Route path="patients" element={<Patients />} />
-        <Route path="departments" element={<Departments />} />
-        <Route path="programs" element={<Programs />} />
-        <Route path="insurance-claims" element={<InsuranceClaims />} />
-        <Route path="insurance-providers" element={<InsuranceProviders />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="logout" element={<Logout />} />
-        <Route path="documentation" element={<Documentation />} />
-      </Route>
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<Overview />} />
+          <Route path="doctors" element={<Doctors />} />
+          <Route path="patients" element={<Patients />} />
+          <Route path="departments" element={<Departments />} />
+          <Route path="programs" element={<Programs />} />
+          <Route path="insurance-claims" element={<InsuranceClaims />} />
+          <Route path="insurance-providers" element={<InsuranceProviders />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="logout" element={<Logout />} />
+          <Route path="documentation" element={<Documentation />} />
+        </Route>
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
+      <ToastContainer position="top-right" autoClose={3000} />
+    </>
   );
 };
 

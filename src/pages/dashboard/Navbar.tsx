@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, ThumbsDown, Menu, Search, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 
-const repositoryUrl = 'https://github.com/K-HIF/HIMS'; 
+const repositoryUrl = 'https://github.com/K-HIF/HIMS';
+const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
 
 type NavbarProps = {
   selectedPage: string;
@@ -18,9 +20,12 @@ const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [starCount, setStarCount] = useState<number | null>(null);
+  const [downvoteCount, setDownvoteCount] = useState<number>(0);
+  const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+  const [loadingDownvote, setLoadingDownvote] = useState<boolean>(false);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
 
-  // Close mobile search on click outside
+  // Dismiss search input on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -31,16 +36,15 @@ const Navbar: React.FC<NavbarProps> = ({
         setShowMobileSearch(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMobileSearch]);
 
-  // Fetch stars
+  // Fetch stars + downvotes on load
   useEffect(() => {
     const fetchStars = async () => {
       try {
-        const response = await fetch('https://healthmgmt-7ztg.onrender.com/api/users/stars/');
+        const response = await fetch(`${BASE_URL}/api/users/stars/`);
         const data = await response.json();
         setStarCount(data?.stars ?? 0);
       } catch (error) {
@@ -49,8 +53,61 @@ const Navbar: React.FC<NavbarProps> = ({
       }
     };
 
+    const fetchDownvotes = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/users/downvotes/`);
+        const data = await response.json();
+        setDownvoteCount(data?.count ?? 0);
+      } catch (error) {
+        console.error('Failed to fetch downvote count:', error);
+        setDownvoteCount(0);
+      }
+    };
+
+    setHasDownvoted(sessionStorage.getItem('downvoted') === 'true');
+
     fetchStars();
+    fetchDownvotes();
   }, []);
+
+  // Downvote handler
+  const handleDownvote = async () => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      toast.error('Please log in to downvote.');
+      return;
+    }
+
+    if (hasDownvoted) {
+      toast.info('You have already downvoted in this session.');
+      return;
+    }
+
+    try {
+      setLoadingDownvote(true);
+      const res = await fetch(`${BASE_URL}/api/users/downvote/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.detail || 'Failed to downvote.');
+      }
+
+      sessionStorage.setItem('downvoted', 'true');
+      setHasDownvoted(true);
+      setDownvoteCount(data.count ?? downvoteCount + 1); // use server count if available
+      toast.success('Thanks for your feedback.');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong.');
+    } finally {
+      setLoadingDownvote(false);
+    }
+  };
 
   return (
     <nav className="flex items-center justify-between px-4 py-3 bg-transparent relative">
@@ -123,11 +180,19 @@ const Navbar: React.FC<NavbarProps> = ({
           {starCount !== null ? starCount : '...'}
         </span>
 
-        <button className="flex items-center gap-1 text-gray-700 text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">
+        <button
+          onClick={handleDownvote}
+          disabled={hasDownvoted || loadingDownvote}
+          className={`flex items-center gap-1 text-sm px-3 py-1 border rounded ${
+            hasDownvoted
+              ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+              : 'text-gray-700 border-gray-300 hover:bg-gray-100'
+          }`}
+        >
           <ThumbsDown size={16} />
-          Downvote
+          {loadingDownvote ? 'Voting...' : hasDownvoted ? 'Downvoted' : 'Downvote'}
         </button>
-        <span className="text-gray-700 text-sm">78</span>
+        <span className="text-gray-700 text-sm">{downvoteCount}</span>
       </div>
     </nav>
   );
