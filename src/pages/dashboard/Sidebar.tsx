@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   LayoutDashboard,
-  User,
   Users,
   Building,
   ClipboardList,
@@ -13,12 +12,6 @@ import {
   X,
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
-type SidebarItem = {
-  label: string;
-  icon: React.ReactNode;
-  route: string;
-};
 
 type SidebarProps = {
   selectedPage: string;

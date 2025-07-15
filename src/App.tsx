@@ -21,7 +21,6 @@ import ReceptionDashboard from './pages/dashboard/ReceptionDashboard';
 import CheckoutDashboard from './pages/dashboard/CheckoutDashboard';
 import PharmacyDashboard from './pages/dashboard/PharmacyDashboard';
 import Staff from './pages/dashboard/Staff';
-import Insurance from './pages/dashboard/Insurance';
 import Facilities from './pages/dashboard/Facilities';
 import Testing from './pages/dashboard/Testing';
 import MyPatients from './pages/dashboard/MyPatients';
