@@ -10,6 +10,7 @@ type NavbarProps = {
   searchTerm: string;
   onSearch: (term: string) => void;
   onToggleSidebar: () => void;
+  role?: string;
 };
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -17,6 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({
   searchTerm,
   onSearch,
   onToggleSidebar,
+  role = 'admin',
 }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [starCount, setStarCount] = useState<number | null>(null);
@@ -117,7 +119,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <Menu size={20} />
         </button>
         <span className="text-sm text-gray-500 font-medium hidden md:inline">
-          hospital / {selectedPage}
+          hospital / {role} / {selectedPage}
         </span>
       </div>
 

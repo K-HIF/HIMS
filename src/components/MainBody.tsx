@@ -13,8 +13,20 @@ const MainBody: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('admin1234');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<string>('admin');
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+
+  const roleOptions = [
+    { label: 'Admin', value: 'admin' },
+    { label: 'Doctor', value: 'doctor' },
+    { label: 'Nurse', value: 'nurse' },
+    { label: 'Lab', value: 'lab' },
+    { label: 'Reception', value: 'reception' },
+    { label: 'Checkout', value: 'checkout' },
+    { label: 'Pharmacy', value: 'pharmacy' },
+  ];
 
   const toggleMode = () => {
     setIsRegistering((prev) => !prev);
@@ -28,6 +40,8 @@ const MainBody: React.FC = () => {
     setPassword('admin1234');
     setEmail('');
     setConfirmPassword('');
+    setRole('admin');
+    setShowRoleDropdown(false);
   };
 
   useEffect(() => {
@@ -52,34 +66,35 @@ const MainBody: React.FC = () => {
     };
   }, [showModal]);
 
+  const handleRoleSelect = (selectedRole: string) => {
+    setRole(selectedRole);
+    setShowRoleDropdown(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const url = isRegistering ? `${BASE_URL}/api/users/register/` : `${BASE_URL}/api/users/login/`;
       const payload = isRegistering
-        ? { username, email, password }
-        : { username, password };
-
+        ? { username, email, password, role }
+        : { username, password, role };
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.detail || 'Something went wrong');
-
       if (isRegistering) {
         setIsRegistering(false); // Switch to login form
       } else {
         // Login success
         localStorage.setItem('access', data.access);
         localStorage.setItem('refresh', data.refresh);
+        localStorage.setItem('role', role); // Store role for routing
         closeModal();
-        navigate('/dashboard');
+        navigate(`/dashboard/${role}`); // Route to correct dashboard
       }
     } catch (err: any) {
       alert(err.message);
@@ -110,13 +125,30 @@ const MainBody: React.FC = () => {
             ref={modalRef}
             className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md border border-white/20 relative"
           >
-            <button
-              onClick={closeModal}
-              className="absolute top-3 right-4 text-white text-2xl font-light hover:text-red-400 transition"
-              aria-label="Close"
-            >
-              ×
-            </button>
+            {/* Role dropdown trigger */}
+            <div className="absolute top-3 right-4 flex items-center gap-2">
+              <button
+                onClick={() => setShowRoleDropdown((prev) => !prev)}
+                className="text-white text-2xl font-light hover:text-cyan-400 transition"
+                aria-label="Select Role"
+              >
+                +
+              </button>
+              {showRoleDropdown && (
+                <div className="absolute top-8 right-0 w-32 bg-white rounded shadow-lg z-50 border border-cyan-200" style={{ fontSize: '0.95rem' }}>
+                  {roleOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleRoleSelect(opt.value)}
+                      className={`block w-full text-left px-3 py-1 text-gray-800 hover:bg-cyan-100 ${role === opt.value ? 'bg-cyan-200 font-bold' : ''}`}
+                      style={{ fontSize: '0.95rem' }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <a href="/" className="inline-block mb-6">
               <img
@@ -168,6 +200,13 @@ const MainBody: React.FC = () => {
                   className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 />
               )}
+              {/* Show selected role */}
+              <div className="w-full text-left text-white/80 text-sm mb-2">
+                Role:{' '}
+                <span className="font-bold text-cyan-300">
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </span>
+              </div>
               <button
                 type="submit"
                 disabled={isLoading}

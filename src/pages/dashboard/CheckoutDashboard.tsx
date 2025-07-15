@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import './Overview.css';
 
-const Overview = () => {
+const CheckoutDashboard: React.FC = () => {
   const barChartRef = useRef(null);
   const lineChart1Ref = useRef(null);
   const lineChart2Ref = useRef(null);
@@ -108,12 +108,10 @@ const Overview = () => {
   return (
     <div className="dashboard-wrapper">
       <div className="overview-container">
-        <h3 className="overview-title">Dashboard</h3>
+        <h3 className="overview-title">Doctor Dashboard</h3>
         <p className="overview-subtitle">
-          View patient stats, staff counts, insurance claims, and department details.
+          View patient stats, staff counts, insurance claims, and department details (Doctor view).
         </p>
-
-        {/* Only show carousel on small screens */}
         <div className="overview-cards-carousel" ref={carouselRef}>
           <div className="carousel-track">
             {cards.map((card, index) => (
@@ -215,7 +213,6 @@ const Overview = () => {
           </div>
         </div>
 
-        {/* Restore your additional content/tables below this line if needed */}
         <div className="summary-system-row">
           <div className="summary-table-wrapper">
             <h6 className="summary-table-title">Summary</h6>
@@ -310,4 +307,5 @@ const Overview = () => {
   );
 };
 
-export default Overview;
+export default CheckoutDashboard;
+

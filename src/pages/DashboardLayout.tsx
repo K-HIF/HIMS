@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../pages/dashboard/Sidebar';
 import Navbar from '../pages/dashboard/Navbar';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 
-const DashboardLayout: React.FC = () => {
+const DashboardLayout: React.FC<{ role?: string }> = ({ role }) => {
+  const params = useParams();
+  const currentRole = role || params.role || 'admin';
   const [selectedPage, setSelectedPage] = useState('Dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -38,6 +40,7 @@ const DashboardLayout: React.FC = () => {
           onSelect={setSelectedPage}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+          role={currentRole}
         />
       </div>
 
@@ -48,9 +51,10 @@ const DashboardLayout: React.FC = () => {
           searchTerm={searchTerm}
           onSearch={setSearchTerm}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          role={currentRole}
         />
         <main className="flex-1 overflow-y-auto w-full p-4 md:p-6">
-          <Outlet context={{ searchTerm }} />
+          <Outlet context={{ searchTerm, role: currentRole }} />
         </main>
       </div>
     </div>
