@@ -6,7 +6,6 @@ import Home from './pages/Home';
 import DashboardLayout from './pages/DashboardLayout';
 import NotFound from './pages/NotFound';
 import Overview from './pages/dashboard/Overview';
-import Doctors from './pages/dashboard/Doctors';
 import Patients from './pages/dashboard/Patients';
 import Departments from './pages/dashboard/Departments';
 import Programs from './pages/dashboard/Programs';
@@ -75,7 +74,7 @@ const App = () => {
           <Route path="reception" element={<ReceptionDashboard />} />
           <Route path="checkout" element={<CheckoutDashboard />} />
           <Route path="pharmacy" element={<PharmacyDashboard />} />
-          <Route path=":role/doctors" element={<Doctors />} />
+          
           <Route path=":role/patients" element={<Patients />} />
           <Route path=":role/departments" element={<Departments />} />
           <Route path=":role/programs" element={<Programs />} />

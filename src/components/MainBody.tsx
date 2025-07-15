@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import medicImage from '../assets/medic.jpeg';
+import medicImage from '../assets/medic3.jpg';
 
 const MainBody: React.FC = () => {
   const navigate = useNavigate();
@@ -104,7 +104,7 @@ const MainBody: React.FC = () => {
   };
 
   return (
-    <main className="w-full min-h-screen relative pt-24 text-white home">
+    <main className="w-full min-h-[25vh] relative pt-24 text-white home">
       <div
         className="absolute inset-0 bg-cover bg-center brightness-50 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${medicImage})` }}
