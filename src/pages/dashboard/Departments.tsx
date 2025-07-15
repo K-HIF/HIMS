@@ -187,7 +187,7 @@ const Departments = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredDepartments.map((dept, idx) => (
+                {filteredDepartments.map((dept) => (
                   <tr key={dept.id} className="hover:bg-gray-50 border-b">
                     <td className="py-4 px-4">
                       <div className="flex items-start gap-3">
@@ -296,7 +296,7 @@ const Departments = () => {
         </div>
       )}
       {/* Add loader CSS */}
-      <style jsx>{`
+      <style>{`
         .loader {
           border-top-color: #2563eb;
           animation: spin 0.6s linear infinite;

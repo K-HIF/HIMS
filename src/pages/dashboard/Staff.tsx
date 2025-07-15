@@ -303,7 +303,7 @@ const Staff = () => {
           </div>
         </div>
       )}
-      <style jsx>{`
+      <style>{`
         .loader {
           border-top-color: #2563eb;
           animation: spin 0.6s linear infinite;
