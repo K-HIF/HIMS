@@ -81,14 +81,14 @@ const App = () => {
           <Route path=":role/departments" element={<Departments />} />
           <Route path=":role/programs" element={<Programs />} />
           <Route path=":role/insurance-claims" element={<InsuranceClaims />} />
-          <Route path=":role/insurance-providers" element={<InsuranceProviders />} />
+         
           <Route path=":role/profile" element={<Profile />} />
           <Route path=":role/logout" element={<Logout />} />
           <Route path=":role/documentation" element={<Documentation />} />
 
           {/* Admin */}
           <Route path=":role/staff" element={<Staff />} />
-          <Route path=":role/insurance" element={<Insurance />} />
+          <Route path=":role/insurance" element={<InsuranceProviders />} />
           <Route path=":role/facilities" element={<Facilities />} />
           <Route path=":role/testing" element={<Testing />} />
 
