@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
- //const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
-  const BASE_URL = 'http://127.0.0.1:8000/';
+ const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+  //const BASE_URL = 'http://127.0.0.1:8000/';
   
 type ContextType = {
   searchTerm: string;

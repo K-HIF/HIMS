@@ -16,7 +16,7 @@ type Provider = {
   logo: string;
 };
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+const BASE_URL = 'https://healthmgmt-7ztg.onrender.com/';
 
 const InsuranceProviders = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -108,7 +108,7 @@ const InsuranceProviders = () => {
 
   if (type === 'select' && name === 'plan' && e.target instanceof HTMLSelectElement) {
     const plans = Array.from(e.target.selectedOptions, (option) => option.value);
-    
+
     setEditData({ ...editData, plan: plans });
   } else {
     setEditData({ ...editData, [name]: value });

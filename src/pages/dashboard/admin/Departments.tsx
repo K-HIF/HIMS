@@ -19,7 +19,7 @@ type Staff = {
   staff_type: string;
 };
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
 
 const Departments = () => {
   const { searchTerm }: { searchTerm: string } = useOutletContext();

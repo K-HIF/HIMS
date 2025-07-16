@@ -16,7 +16,7 @@ type Provider = {
   logo: string;
 };
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
 
 const InsuranceProviders = () => {
   const { searchTerm } = useOutletContext<ContextType>();

@@ -16,7 +16,7 @@ type Program = {
   endYear?: string;
 };
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
 
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -25,6 +25,7 @@ const Programs = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [loading, setLoading] = useState(false); // Loading state for fetching and submitting
   const modalRef = useRef<HTMLDivElement>(null);
 
   const [editData, setEditData] = useState<Program>({
@@ -37,11 +38,14 @@ const Programs = () => {
 
   useEffect(() => {
     const fetchPrograms = async () => {
+      setLoading(true); // Set loading to true when fetching
       try {
         const res = await axios.get(`${BASE_URL}/api/users/programs/`);
         setPrograms(res.data);
       } catch (err) {
         console.error('Failed to fetch programs:', err);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
     fetchPrograms();
@@ -100,6 +104,7 @@ const Programs = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true); // Set loading to true when submitting
     try {
       if (isEditMode && editData.id) {
         await axios.put(`${BASE_URL}/api/users/programs/${editData.id}/`, editData);
@@ -111,6 +116,8 @@ const Programs = () => {
       handleCloseModal();
     } catch (err) {
       console.error('Failed to save program:', err);
+    } finally {
+      setLoading(false); // Set loading to false after submitting
     }
   };
 
@@ -133,39 +140,46 @@ const Programs = () => {
       {/* Table View */}
       {!isSmallScreen && (
         <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
-            <thead>
-              <tr className="border-b">
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Program</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Email</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Status</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Start Year</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">End Year</th>
-                <th className="pt-6 pb-3 px-4"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPrograms.map((p) => (
-                <tr key={p.id} className="hover:bg-gray-50 border-b">
-                  <td className="py-4 px-4 font-medium text-gray-800">{p.name}</td>
-                  <td className="py-4 px-4 text-sm text-gray-500">{p.email}</td>
-                  <td className={`py-4 px-4 ${p.status === 'Active' ? 'text-green-600' : 'text-red-500'}`}>
-                    {p.status}
-                  </td>
-                  <td className="py-4 px-4">{p.startYear}</td>
-                  <td className="py-4 px-4">{p.endYear || 'N/A'}</td>
-                  <td className="py-4 px-4">
-                    <button
-                      onClick={() => handleEditClick(p)}
-                      className="text-blue-500 hover:text-blue-700 transform transition-transform duration-200 hover:scale-110"
-                    >
-                      <Pencil size={18} />
-                    </button>
-                  </td>
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></span>
+              <span className="ml-4 text-gray-600">Loading programs...</span>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b">
+                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Program</th>
+                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Email</th>
+                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Status</th>
+                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Start Year</th>
+                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">End Year</th>
+                  <th className="pt-6 pb-3 px-4"></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredPrograms.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 border-b">
+                    <td className="py-4 px-4 font-medium text-gray-800">{p.name}</td>
+                    <td className="py-4 px-4 text-sm text-gray-500">{p.email}</td>
+                    <td className={`py-4 px-4 ${p.status === 'Active' ? 'text-green-600' : 'text-red-500'}`}>
+                      {p.status}
+                    </td>
+                    <td className="py-4 px-4">{p.startYear}</td>
+                    <td className="py-4 px-4">{p.endYear || 'N/A'}</td>
+                    <td className="py-4 px-4">
+                      <button
+                        onClick={() => handleEditClick(p)}
+                        className="text-blue-500 hover:text-blue-700 transform transition-transform duration-200 hover:scale-110"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 
@@ -239,7 +253,8 @@ const Programs = () => {
                 <input type="date" name="startYear" value={editData.startYear} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
                 <input type="date" name="endYear" value={editData.endYear} onChange={handleChange} className="w-full border rounded-md px-3 py-2" />
                 <div className="flex justify-end pt-4">
-                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2">
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2" disabled={loading}>
+                    {loading && <span className="loader border-2 border-t-2 border-gray-200 border-t-blue-500 rounded-full w-4 h-4 mr-2 animate-spin"></span>}
                     {isEditMode ? 'Update Program' : 'Add Program'}
                   </button>
                 </div>
