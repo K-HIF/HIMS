@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
-// Updated Department type to match backend API
 interface Department {
   id: number;
   name: string;
@@ -13,8 +12,6 @@ interface Department {
   date_formed: string;
 }
 
-
-
 type Staff = {
   id: number;
   name: string;
@@ -22,32 +19,40 @@ type Staff = {
   staff_type: string;
 };
 
+const BASE_URL = 'http://127.0.0.1:8000';
+
 const Departments = () => {
   const { searchTerm }: { searchTerm: string } = useOutletContext();
-  const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
-
   const [editData, setEditData] = useState<Department | any>({
     name: '',
     email: '',
     hod_name: '',
     date_formed: '',
   });
-
   const [loading, setLoading] = useState(false);
-
-  // Fetch departments from backend
   const [departments, setDepartments] = useState<Department[]>([]);
-  useEffect(() => {
+  const [hodCandidates, setHodCandidates] = useState<Staff[]>([]);
+
+  const fetchDepartments = async () => {
     setLoading(true);
-    axios.get(`${BASE_URL}/api/users/departments/`)
-      .then(res => setDepartments(res.data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+    try {
+      const response = await axios.get(`${BASE_URL}/api/users/departments/`);
+      setDepartments(response.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDepartments();
   }, []);
 
   const filteredDepartments = departments.filter((dept) =>
@@ -71,8 +76,6 @@ const Departments = () => {
     };
     if (isModalOpen || selectedDept) {
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -95,17 +98,13 @@ const Departments = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${BASE_URL}/api/users/departments/`, {
-        name: editData.name,
-        email: editData.email,
-        date_formed: editData.date_formed,
-        // Backend expects 'hod' (id), but for demo, using hod_name as placeholder
-      });
-      setIsModalOpen(false);
-      setEditData({ name: '', email: '', hod_name: '', date_formed: '' });
-      axios.get(`${BASE_URL}/api/users/departments/`)
-        .then(res => setDepartments(res.data))
-        .catch(err => console.error(err));
+      if (isEditMode) {
+        await axios.put(`${BASE_URL}/api/users/departments/${editData.id}/`, editData);
+      } else {
+        await axios.post(`${BASE_URL}/api/users/departments/`, editData);
+      }
+      handleCloseModal();
+      await fetchDepartments(); // Fetch updated departments after submission
     } catch (err) {
       console.error(err);
     } finally {
@@ -118,22 +117,21 @@ const Departments = () => {
     setSelectedDept(null);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  const [hodCandidates, setHodCandidates] = useState<Staff[]>([]);
-
-  // Fetch all staff types for the selected department when editing
   useEffect(() => {
     if (isModalOpen && isEditMode && editData.id) {
       Promise.all([
-        axios.get(`${BASE_URL}/api/users/doctors/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Doctor'}))),
-        axios.get(`${BASE_URL}/api/users/nurses/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Nurse'}))),
-        axios.get(`${BASE_URL}/api/users/labtechnicians/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Lab Technician'}))),
-        axios.get(`${BASE_URL}/api/users/pharmacists/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Pharmacist'}))),
-        axios.get(`${BASE_URL}/api/users/receptionists/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Receptionist'}))),
-        axios.get(`${BASE_URL}/api/users/financestaff/?department=${editData.id}`).then(res => res.data.map((s: any) => ({...s, staff_type: 'Finance Staff'}))),
+        axios.get(`${BASE_URL}/api/users/doctors/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Doctor' }))),
+        axios.get(`${BASE_URL}/api/users/nurses/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Nurse' }))),
+        axios.get(`${BASE_URL}/api/users/labtechnicians/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Lab Technician' }))),
+        axios.get(`${BASE_URL}/api/users/pharmacists/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Pharmacist' }))),
+        axios.get(`${BASE_URL}/api/users/receptionists/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Receptionist' }))),
+        axios.get(`${BASE_URL}/api/users/financestaff/?department=${editData.id}`).then(res => res.data.map((s: any) => ({ ...s, staff_type: 'Finance Staff' }))),
       ])
         .then(([doctors, nurses, labtechs, pharmacists, receptionists, financestaff]) => {
           setHodCandidates([
@@ -219,31 +217,51 @@ const Departments = () => {
 
       {/* Mobile List View */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold mb-3">Departments List</h2>
+        <div className="w-full px-2 mt-4 space-y-4 max-w-md mx-auto">
           {loading ? (
-            <div className="flex justify-center items-center h-24">
-              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-8 h-8 animate-spin"></span>
-              <span className="ml-3 text-gray-600">Loading departments...</span>
+            <div className="flex justify-center items-center h-32">
+              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></span>
+              <span className="ml-4 text-gray-600">Loading departments...</span>
             </div>
           ) : (
-            <ul className="space-y-2">
-              {filteredDepartments.map((dept) => (
-                <li key={dept.id}>
+            filteredDepartments.map((dept) => (
+              <div
+                key={dept.id}
+                className="bg-white rounded-2xl shadow-md p-4 space-y-2 border border-gray-200"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex items-start gap-3">
+                    <Building className="text-gray-700" size={24} />
+                    <div>
+                      <h2 className="text-base font-semibold text-gray-900">{dept.name}</h2>
+                      <p className="text-sm text-gray-500">{dept.email}</p>
+                    </div>
+                  </div>
                   <button
-                    onClick={() => setSelectedDept(dept)}
-                    className="w-full text-left text-blue-600 hover:underline"
+                    onClick={() => handleEditClick(dept)}
+                    className="text-blue-600 hover:text-blue-800"
                   >
-                    {dept.name}
+                    <Pencil size={18} />
                   </button>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <div className="text-sm text-gray-700">
+                  <p>
+                    <span className="font-medium text-gray-800">Head:</span> {dept.hod_name}
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-800">No. of Staff:</span> {dept.staff_count}
+                  </p>
+                  <p>
+                    <span className="font-medium text-gray-800">Date Formed:</span> {dept.date_formed}
+                  </p>
+                </div>
+              </div>
+            ))
           )}
         </div>
       )}
 
-      {/* Shared Modal */}
+      {/* Modal */}
       {(isModalOpen || selectedDept) && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-4">
           <div ref={modalRef} className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
@@ -266,23 +284,18 @@ const Departments = () => {
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Name" className="w-full border rounded-md px-3 py-2" required />
                 <input type="email" name="email" value={editData.email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" required />
-                {/* HOD dropdown for edit mode */}
-                {isEditMode ? (
-                  <select
-                    name="hod"
-                    value={editData.hod || ''}
-                    onChange={e => setEditData({ ...editData, hod: e.target.value })}
-                    className="w-full border rounded-md px-3 py-2"
-                    required
-                  >
-                    <option value="">Select Head of Department</option>
-                    {hodCandidates.map((staff) => (
-                      <option key={staff.id + staff.staff_type} value={staff.id}>{staff.name} ({staff.email}) - {staff.staff_type}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input type="text" name="hod_name" value={editData.hod_name} onChange={handleChange} placeholder="Head of Department (for display only)" className="w-full border rounded-md px-3 py-2" />
-                )}
+                <select
+                  name="hod_name"
+                  value={editData.hod_name}
+                  onChange={handleChange}
+                  className="w-full border rounded-md px-3 py-2"
+                  required
+                >
+                  <option value="">Select Head of Department</option>
+                  {hodCandidates.map((candidate) => (
+                    <option key={candidate.id} value={candidate.name}>{candidate.name} ({candidate.email})</option>
+                  ))}
+                </select>
                 <input type="date" name="date_formed" value={editData.date_formed} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
                 <div className="flex justify-end pt-4">
                   <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2" disabled={loading}>

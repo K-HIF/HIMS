@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
-import './Overview.css';
+import '../admin/Overview.css';
 
-const NurseDashboard: React.FC = () => {
+const PharmacyDashboard: React.FC = () => {
   const barChartRef = useRef(null);
   const lineChart1Ref = useRef(null);
   const lineChart2Ref = useRef(null);
@@ -230,9 +230,7 @@ const NurseDashboard: React.FC = () => {
                   <tr>
                     <td><span className="dept-icon material-symbols-rounded">favorite</span>Cardiology</td>
                     <td className="member-images">
-                      <img src="/avatars/doc1.png" alt="M1" />
-                      <img src="/avatars/doc2.png" alt="M2" />
-                      <img src="/avatars/doc3.png" alt="M3" />
+                      5
                     </td>
                     <td>240</td>
                     <td>$12,000</td>
@@ -240,8 +238,7 @@ const NurseDashboard: React.FC = () => {
                   <tr>
                     <td><span className="dept-icon material-symbols-rounded">psychology</span>Neurology</td>
                     <td className="member-images">
-                      <img src="/avatars/doc4.png" alt="M4" />
-                      <img src="/avatars/doc5.png" alt="M5" />
+                      5
                     </td>
                     <td>185</td>
                     <td>$9,500</td>
@@ -249,10 +246,7 @@ const NurseDashboard: React.FC = () => {
                   <tr>
                     <td><span className="dept-icon material-symbols-rounded">child_care</span>Pediatrics</td>
                     <td className="member-images">
-                      <img src="/avatars/doc6.png" alt="M6" />
-                      <img src="/avatars/doc7.png" alt="M7" />
-                      <img src="/avatars/doc8.png" alt="M8" />
-                      <img src="/avatars/doc9.png" alt="M9" />
+                      5
                     </td>
                     <td>310</td>
                     <td>$14,200</td>
@@ -307,4 +301,4 @@ const NurseDashboard: React.FC = () => {
   );
 };
 
-export default NurseDashboard;
+export default PharmacyDashboard;

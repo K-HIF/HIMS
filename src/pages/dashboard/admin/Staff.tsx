@@ -232,29 +232,55 @@ const Staff = () => {
 
       {/* Mobile List View */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold mb-3">Members List</h2>
-          {loading ? (
-            <div className="flex justify-center items-center h-24">
-              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-8 h-8 animate-spin"></span>
-              <span className="ml-3 text-gray-600">Loading staff...</span>
+  <div className="w-full px-2 mt-4 space-y-4 max-w-md mx-auto">
+    {loading ? (
+      <div className="flex justify-center items-center h-32">
+        <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></span>
+        <span className="ml-4 text-gray-600">Loading staff...</span>
+      </div>
+    ) : (
+      filteredStaff.map((member) => (
+        <div
+          key={member.id}
+          className="bg-white rounded-2xl shadow-md p-4 space-y-2 border border-gray-200"
+        >
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">{member.name}</h2>
+              <p className="text-sm text-gray-500">{member.email}</p>
             </div>
-          ) : (
-            <ul className="space-y-2">
-              {filteredStaff.map((member) => (
-                <li key={member.id}>
-                  <button
-                    onClick={() => setSelectedStaff(member)}
-                    className="w-full text-left text-blue-600 hover:underline"
-                  >
-                    {member.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+            <button
+              onClick={() => handleEditClick(member)}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <Pencil size={18} />
+            </button>
+          </div>
+          <div className="text-sm text-gray-700">
+            <p>
+              <span className="font-medium text-gray-800">Department:</span>{' '}
+              {member.department?.name || 'N/A'}
+            </p>
+            <p>
+              <span className="font-medium text-gray-800">Status:</span>{' '}
+              <span className={member.status ? 'text-green-600' : 'text-red-500'}>
+                {member.status ? 'Active' : 'Inactive'}
+              </span>
+            </p>
+            <p>
+              <span className="font-medium text-gray-800">Employed:</span>{' '}
+              {member.employed_date}
+            </p>
+            <p>
+              <span className="font-medium text-gray-800">Staff ID:</span>{' '}
+              {member.staff_id}
+            </p>
+          </div>
         </div>
-      )}
+      ))
+    )}
+  </div>
+)}
 
       {/* Modal */}
       {(isModalOpen || selectedStaff) && (

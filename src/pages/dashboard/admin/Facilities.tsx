@@ -1,6 +1,9 @@
 import { Pencil, PlusCircle, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import axios from 'axios';
+
+const BASE_URL = 'http://127.0.0.1:8000/';
 
 type ContextType = {
   searchTerm: string;
@@ -22,15 +25,13 @@ const Facilities = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
-  //const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
-  const BASE_URL = 'http://127.0.0.1:8000';
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const [editData, setEditData] = useState<Facility>({
     name: '',
     count: 0,
     occupied: 0,
   });
-  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');
@@ -49,8 +50,6 @@ const Facilities = () => {
     };
     if (isModalOpen || selectedFacility) {
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -64,9 +63,8 @@ const Facilities = () => {
   const fetchFacilities = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${BASE_URL}/api/users/facilities`);
-      const data = await res.json();
-      setFacilities(data);
+      const res = await axios.get(`${BASE_URL}/api/users/facilities`);
+      setFacilities(res.data);
     } catch (err) {
       console.error('Error fetching facilities:', err);
     } finally {
@@ -82,12 +80,7 @@ const Facilities = () => {
 
   const handleEditClick = (facility: Facility) => {
     setIsEditMode(true);
-    setEditData({
-      id: facility.id,
-      name: facility.name,
-      count: facility.count,
-      occupied: facility.occupied,
-    });
+    setEditData(facility);
     setIsModalOpen(true);
   };
 
@@ -108,17 +101,9 @@ const Facilities = () => {
     setModalLoading(true);
     try {
       if (isEditMode && editData.id) {
-        await fetch(`${BASE_URL}/api/users/facilities/${editData.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editData),
-        });
+        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}`, editData);
       } else {
-        await fetch(`${BASE_URL}/api/users/facilities/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(editData),
-        });
+        await axios.post(`${BASE_URL}/api/users/facilities/`, editData);
       }
       await fetchFacilities();
       handleCloseModal();
@@ -150,14 +135,14 @@ const Facilities = () => {
       </div>
 
       {/* Table View */}
-      {loading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-blue-600">Loading facilities...</span>
-        </div>
-      ) : (
-        !isSmallScreen && (
-          <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
+      {!isSmallScreen && (
+        <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></span>
+              <span className="ml-4 text-gray-600">Loading facilities...</span>
+            </div>
+          ) : (
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="border-b">
@@ -169,8 +154,8 @@ const Facilities = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredFacilities.map((facility, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 border-b">
+                {filteredFacilities.map((facility) => (
+                  <tr key={facility.id} className="hover:bg-gray-50 border-b">
                     <td className="py-4 px-4 font-medium text-gray-800">{facility.name}</td>
                     <td className="py-4 px-4">{facility.count}</td>
                     <td className="py-4 px-4">{facility.occupied}</td>
@@ -187,26 +172,36 @@ const Facilities = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-        )
+          )}
+        </div>
       )}
 
       {/* Mobile View */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold mb-3">Facilities List</h2>
-          <ul className="space-y-2">
-            {filteredFacilities.map((f, idx) => (
-              <li key={idx}>
-                <button
-                  onClick={() => setSelectedFacility(f)}
-                  className="w-full text-left text-blue-600 hover:underline"
-                >
-                  {f.name}
-                </button>
-              </li>
-            ))}
-          </ul>
+        <div className="w-full max-w-md mx-auto py-4 flex flex-col gap-4">
+          {loading ? (
+            <div className="flex justify-center items-center h-32">
+              <span className="loader border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></span>
+              <span className="ml-4 text-gray-600">Loading facilities...</span>
+            </div>
+          ) : (
+            filteredFacilities.map((facility) => (
+              <div key={facility.id} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-lg font-semibold text-gray-900">{facility.name}</h2>
+                  <button
+                    onClick={() => handleEditClick(facility)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-700"><strong>Count:</strong> {facility.count}</p>
+                <p className="text-sm text-gray-700"><strong>Occupied:</strong> {facility.occupied}</p>
+                <p className="text-sm text-gray-700"><strong>Deficit:</strong> {facility.count - facility.occupied}</p>
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -233,18 +228,13 @@ const Facilities = () => {
                 <p><strong>Deficit:</strong> {selectedFacility.count - selectedFacility.occupied}</p>
               </div>
             ) : (
-              <form className="space-y-4">
-                <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Facility Name" className="w-full border rounded-md px-3 py-2" />
-                <input type="number" name="count" value={editData.count} onChange={handleChange} placeholder="Count" className="w-full border rounded-md px-3 py-2" />
-                <input type="number" name="occupied" value={editData.occupied} onChange={handleChange} placeholder="Occupied" className="w-full border rounded-md px-3 py-2" />
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Facility Name" className="w-full border rounded-md px-3 py-2" required />
+                <input type="number" name="count" value={editData.count} onChange={handleChange} placeholder="Count" className="w-full border rounded-md px-3 py-2" required />
+                <input type="number" name="occupied" value={editData.occupied} onChange={handleChange} placeholder="Occupied" className="w-full border rounded-md px-3 py-2" required />
                 <div className="flex justify-end pt-4">
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
-                    disabled={modalLoading}
-                  >
-                    {isEditMode ? 'Save Changes' : 'Add Facility'}
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2">
+                    {isEditMode ? 'Update Facility' : 'Add Facility'}
                   </button>
                 </div>
               </form>
@@ -252,6 +242,15 @@ const Facilities = () => {
           </div>
         </div>
       )}
+      <style>{`
+        .loader {
+          border-top-color: #2563eb;
+          animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

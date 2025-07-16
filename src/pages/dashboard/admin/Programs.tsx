@@ -1,19 +1,22 @@
 import { Pencil, PlusCircle, X } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import axios from 'axios';
 
 type ContextType = {
   searchTerm: string;
 };
 
 type Program = {
+  id?: number;
   name: string;
   email: string;
-  program: string;
-  status: string;
+  status: 'Active' | 'Inactive';
   startYear: string;
-  avatar: string;
+  endYear?: string;
 };
+
+const BASE_URL = 'http://127.0.0.1:8000';
 
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -21,7 +24,28 @@ const Programs = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  const [editData, setEditData] = useState<Program>({
+    name: '',
+    email: '',
+    status: 'Active',
+    startYear: '',
+    endYear: '',
+  });
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/api/users/programs/`);
+        setPrograms(res.data);
+      } catch (err) {
+        console.error('Failed to fetch programs:', err);
+      }
+    };
+    fetchPrograms();
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');
@@ -34,47 +58,14 @@ const Programs = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setIsModalOpen(false);
-        setSelectedProgram(null);
+        handleCloseModal();
       }
     };
     if (isModalOpen || selectedProgram) {
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
     }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isModalOpen, selectedProgram]);
-
-  const [editData, setEditData] = useState<Program>({
-    name: '',
-    email: '',
-    program: '',
-    status: 'Active',
-    startYear: '',
-    avatar: 'https://via.placeholder.com/40?text=🏥',
-  });
-
-  const programs: Program[] = [
-    {
-      name: 'Medicare Advantage',
-      email: 'contact@medicare.com',
-      program: 'Senior Care',
-      status: 'Active',
-      startYear: '2010',
-      avatar: 'https://via.placeholder.com/100',
-    },
-    {
-      name: 'HealthyLife Plan',
-      email: 'info@healthylife.com',
-      program: 'Wellness',
-      status: 'Inactive',
-      startYear: '2017',
-      avatar: 'https://via.placeholder.com/100',
-    },
-  ];
 
   const filteredPrograms = programs.filter((p) =>
     `${p.name} ${p.email}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -91,10 +82,9 @@ const Programs = () => {
     setEditData({
       name: '',
       email: '',
-      program: '',
       status: 'Active',
       startYear: '',
-      avatar: 'https://via.placeholder.com/40?text=🏥',
+      endYear: '',
     });
     setIsModalOpen(true);
   };
@@ -106,6 +96,22 @@ const Programs = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      if (isEditMode && editData.id) {
+        await axios.put(`${BASE_URL}/api/users/programs/${editData.id}/`, editData);
+      } else {
+        await axios.post(`${BASE_URL}/api/users/programs/`, editData);
+      }
+      const res = await axios.get(`${BASE_URL}/api/users/programs/`);
+      setPrograms(res.data);
+      handleCloseModal();
+    } catch (err) {
+      console.error('Failed to save program:', err);
+    }
   };
 
   return (
@@ -124,34 +130,30 @@ const Programs = () => {
         </div>
       </div>
 
-      {/* Table View (Large screens only) */}
+      {/* Table View */}
       {!isSmallScreen && (
         <div className="relative z-10 -mt-14 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-6 py-8 overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="border-b">
                 <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Program</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Type</th>
+                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Email</th>
                 <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Status</th>
                 <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Start Year</th>
-                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium"></th>
+                <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">End Year</th>
+                <th className="pt-6 pb-3 px-4"></th>
               </tr>
             </thead>
             <tbody>
-              {filteredPrograms.map((p, idx) => (
-                <tr key={idx} className="hover:bg-gray-50 border-b">
-                  <td className="py-4 px-4">
-                    <div className="flex items-start gap-3">
-                      <img src={p.avatar} alt={p.name} className="w-10 h-10 rounded-full object-cover" />
-                      <div>
-                        <div className="font-medium text-gray-800">{p.name}</div>
-                        <div className="text-sm text-gray-500">{p.email}</div>
-                      </div>
-                    </div>
+              {filteredPrograms.map((p) => (
+                <tr key={p.id} className="hover:bg-gray-50 border-b">
+                  <td className="py-4 px-4 font-medium text-gray-800">{p.name}</td>
+                  <td className="py-4 px-4 text-sm text-gray-500">{p.email}</td>
+                  <td className={`py-4 px-4 ${p.status === 'Active' ? 'text-green-600' : 'text-red-500'}`}>
+                    {p.status}
                   </td>
-                  <td className="py-4 px-4">{p.program}</td>
-                  <td className={`py-4 px-4 ${p.status === 'Active' ? 'text-green-600' : 'text-red-500'}`}>{p.status}</td>
                   <td className="py-4 px-4">{p.startYear}</td>
+                  <td className="py-4 px-4">{p.endYear || 'N/A'}</td>
                   <td className="py-4 px-4">
                     <button
                       onClick={() => handleEditClick(p)}
@@ -167,22 +169,44 @@ const Programs = () => {
         </div>
       )}
 
-      {/* Mobile List View (small screen) */}
+      {/* Mobile List View */}
       {isSmallScreen && (
-        <div className="-mt-10 z-10 w-[108%] max-w-[108%] bg-white shadow-md rounded-md px-4 py-12 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold mb-3">Programs List</h2>
-          <ul className="space-y-2">
-            {filteredPrograms.map((p, idx) => (
-              <li key={idx}>
+        <div className="w-full px-2 mt-4 space-y-4 max-w-md mx-auto">
+          {filteredPrograms.map((p) => (
+            <div
+              key={p.id}
+              className="bg-white rounded-2xl shadow-md p-4 space-y-2 border border-gray-200"
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-start gap-3">
+                  <div>
+                    <h2 className="text-base font-semibold text-gray-900">{p.name}</h2>
+                    <p className="text-sm text-gray-500">{p.email}</p>
+                  </div>
+                </div>
                 <button
-                  onClick={() => setSelectedProgram(p)}
-                  className="w-full text-left text-blue-600 hover:underline"
+                  onClick={() => handleEditClick(p)}
+                  className="text-blue-600 hover:text-blue-800"
                 >
-                  {p.name}
+                  <Pencil size={18} />
                 </button>
-              </li>
-            ))}
-          </ul>
+              </div>
+              <div className="text-sm text-gray-700">
+                <p>
+                  <span className="font-medium text-gray-800">Status:</span> 
+                  <span className={p.status === 'Active' ? 'text-green-600' : 'text-red-500'}>
+                    {p.status}
+                  </span>
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800">Start Year:</span> {p.startYear}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-800">End Year:</span> {p.endYear || 'N/A'}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -198,32 +222,25 @@ const Programs = () => {
             </h2>
             {selectedProgram ? (
               <div className="space-y-2 text-center">
-                <img
-                  src={selectedProgram.avatar}
-                  alt={selectedProgram.name}
-                  className="w-24 h-24 rounded-full object-cover mx-auto"
-                />
                 <div className="font-medium text-gray-800 text-lg">{selectedProgram.name}</div>
                 <div className="text-sm text-gray-500">{selectedProgram.email}</div>
-                <p><strong>Type:</strong> {selectedProgram.program}</p>
-                <p>
-                  <strong>Status:</strong> <span className={selectedProgram.status === 'Active' ? 'text-green-600' : 'text-red-500'}>{selectedProgram.status}</span>
-                </p>
+                <p><strong>Status:</strong> <span className={selectedProgram.status === 'Active' ? 'text-green-600' : 'text-red-500'}>{selectedProgram.status}</span></p>
                 <p><strong>Start Year:</strong> {selectedProgram.startYear}</p>
+                <p><strong>End Year:</strong> {selectedProgram.endYear || 'N/A'}</p>
               </div>
             ) : (
-              <form className="space-y-4">
-                <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Program Name" className="w-full border rounded-md px-3 py-2" />
-                <input type="email" name="email" value={editData.email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" />
-                <input type="text" name="program" value={editData.program} onChange={handleChange} placeholder="Type" className="w-full border rounded-md px-3 py-2" />
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <input type="text" name="name" value={editData.name} onChange={handleChange} placeholder="Program Name" className="w-full border rounded-md px-3 py-2" required />
+                <input type="email" name="email" value={editData.email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" required />
                 <select name="status" value={editData.status} onChange={handleChange} className="w-full border rounded-md px-3 py-2">
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
-                <input type="text" name="startYear" value={editData.startYear} onChange={handleChange} placeholder="Start Year" className="w-full border rounded-md px-3 py-2" />
+                <input type="date" name="startYear" value={editData.startYear} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
+                <input type="date" name="endYear" value={editData.endYear} onChange={handleChange} className="w-full border rounded-md px-3 py-2" />
                 <div className="flex justify-end pt-4">
-                  <button type="button" onClick={handleCloseModal} className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
-                    {isEditMode ? 'Save Changes' : 'Add Program'}
+                  <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2">
+                    {isEditMode ? 'Update Program' : 'Add Program'}
                   </button>
                 </div>
               </form>
@@ -231,6 +248,15 @@ const Programs = () => {
           </div>
         </div>
       )}
+      <style>{`
+        .loader {
+          border-top-color: #2563eb;
+          animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };
