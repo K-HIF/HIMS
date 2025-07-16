@@ -16,7 +16,9 @@ const MainBody: React.FC = () => {
   const [role, setRole] = useState<string>('admin');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-  const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+  //const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+  const BASE_URL = 'http://127.0.0.1:8000/';
+  
 
   const roleOptions = [
     { label: 'Admin', value: 'admin' },
@@ -104,7 +106,7 @@ const MainBody: React.FC = () => {
   };
 
   return (
-    <main className="w-full min-h-[25vh] relative pt-24 text-white home">
+    <main className="w-full min-h-screen relative pt-24 text-white home">
       <div
         className="absolute inset-0 bg-cover bg-center brightness-50 z-0 pointer-events-none"
         style={{ backgroundImage: `url(${medicImage})` }}
