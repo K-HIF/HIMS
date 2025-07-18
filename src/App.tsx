@@ -39,7 +39,7 @@ import Inventory from './pages/dashboard/lab/Inventory';
 import Tests from './pages/dashboard/lab/Tests';
 import Notifications from './pages/dashboard/lab/Notifications';
 import Register from './pages/dashboard/reception/Register';
-import Documents from './pages/dashboard/reception/Documents';
+import Documents from './pages/dashboard/Documents';
 import Donate from './pages/dashboard/reception/Donate';
 import Billing from './pages/dashboard/billing/Billing';
 import Payments from './pages/dashboard/billing/Payments';

@@ -150,7 +150,7 @@ const InsuranceProviders = () => {
       {/* Header */}
       <div className="w-full max-w-[92rem] bg-gradient-to-r from-black to-gray-700 shadow-lg px-4 sm:px-10 py-6 rounded-md mt-4 z-20">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-white">Insurance Providers</h1>
+          <h1 className="text-xl font-semibold text-white">Insurance </h1>
           <button
             onClick={handleAddClick}
             className="flex items-center gap-2 text-green-400 hover:text-green-200 font-medium"

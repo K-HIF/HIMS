@@ -9,24 +9,21 @@ const MainBody: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const [username, setUsername] = useState('A17xx');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('admin1234');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<string>('admin');
+  const [fullName, setFullName] = useState('');
+  const [password, setPassword] = useState('');
+  const [department, setDepartment] = useState<string>('admin'); 
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-  //const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
-  const BASE_URL = 'http://127.0.0.1:8000/';
-  
+  const BASE_URL = 'http://127.0.0.1:8000';
 
-  const roleOptions = [
+  const departmentOptions = [
     { label: 'Admin', value: 'admin' },
     { label: 'Doctor', value: 'doctor' },
     { label: 'Nurse', value: 'nurse' },
     { label: 'Lab', value: 'lab' },
     { label: 'Reception', value: 'reception' },
-    { label: 'Checkout', value: 'checkout' },
+    { label: 'Finance', value: 'finance' },
     { label: 'Pharmacy', value: 'pharmacy' },
   ];
 
@@ -38,11 +35,10 @@ const MainBody: React.FC = () => {
   const closeModal = () => {
     setShowModal(false);
     setIsRegistering(false);
-    setUsername('A17xx');
-    setPassword('admin1234');
     setEmail('');
-    setConfirmPassword('');
-    setRole('admin');
+    setFullName('');
+    setPassword(''); 
+    setDepartment('admin'); // Reset department to default
     setShowRoleDropdown(false);
   };
 
@@ -68,19 +64,19 @@ const MainBody: React.FC = () => {
     };
   }, [showModal]);
 
-  const handleRoleSelect = (selectedRole: string) => {
-    setRole(selectedRole);
+  const handleDepartmentSelect = (selectedDepartment: string) => {
+    setDepartment(selectedDepartment);
     setShowRoleDropdown(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const url = isRegistering ? `${BASE_URL}/api/users/register/` : `${BASE_URL}/api/users/login/`;
-      const payload = isRegistering
-        ? { username, email, password, role }
-        : { username, password, role };
+      const url = `${BASE_URL}/api/users/register/`;
+      const payload = isRegistering && department === 'admin' 
+        ? { email, fullName, password, department } // Use department instead of role
+        : { email, fullName, department }; // No password for non-admin departments
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,16 +84,41 @@ const MainBody: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Something went wrong');
-      if (isRegistering) {
-        setIsRegistering(false); // Switch to login form
-      } else {
-        // Login success
-        localStorage.setItem('access', data.access);
-        localStorage.setItem('refresh', data.refresh);
-        localStorage.setItem('role', role); // Store role for routing
-        closeModal();
-        navigate(`/dashboard/${role}`); // Route to correct dashboard
+      closeModal();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const url = `${BASE_URL}/api/users/login/`;
+      const payload = { email, password };
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Assuming the backend now sends department instead of role
+      if (data.user.department !== department) {
+        alert(`Login failed: Account doesn't have access to ${department} dashboard.`);
+        return;
       }
+
+      if (!res.ok) throw new Error(data.detail || 'Something went wrong');
+      // Handle successful login
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      console.log('Login successful:', data);
+      closeModal();
+      navigate(`/dashboard/${department}`); // Navigate to the department dashboard
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -127,22 +148,22 @@ const MainBody: React.FC = () => {
             ref={modalRef}
             className="bg-white/10 backdrop-blur-md p-8 rounded-xl shadow-2xl w-full max-w-md border border-white/20 relative"
           >
-            {/* Role dropdown trigger */}
+            {/* Department dropdown trigger */}
             <div className="absolute top-3 right-4 flex items-center gap-2">
               <button
                 onClick={() => setShowRoleDropdown((prev) => !prev)}
                 className="text-white text-2xl font-light hover:text-cyan-400 transition"
-                aria-label="Select Role"
+                aria-label="Select Department"
               >
                 +
               </button>
               {showRoleDropdown && (
                 <div className="absolute top-8 right-0 w-32 bg-white rounded shadow-lg z-50 border border-cyan-200" style={{ fontSize: '0.95rem' }}>
-                  {roleOptions.map((opt) => (
+                  {departmentOptions.map((opt) => (
                     <button
                       key={opt.value}
-                      onClick={() => handleRoleSelect(opt.value)}
-                      className={`block w-full text-left px-3 py-1 text-gray-800 hover:bg-cyan-100 ${role === opt.value ? 'bg-cyan-200 font-bold' : ''}`}
+                      onClick={() => handleDepartmentSelect(opt.value)}
+                      className={`block w-full text-left px-3 py-1 text-gray-800 hover:bg-cyan-100 ${department === opt.value ? 'bg-cyan-200 font-bold' : ''}`}
                       style={{ fontSize: '0.95rem' }}
                     >
                       {opt.label}
@@ -169,44 +190,56 @@ const MainBody: React.FC = () => {
                 : 'Sign in to manage your medical records.'}
             </p>
 
-            <form className="space-y-4 mb-4" onSubmit={handleSubmit}>
-              <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-              {isRegistering && (
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                />
+            <form className="space-y-4 mb-4" onSubmit={isRegistering ? handleRegisterSubmit : handleLoginSubmit}>
+              {isRegistering ? (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  {department === 'admin' && (
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    />
+                  )}
+                </>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  />
+                </>
               )}
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-              {isRegistering && (
-                <input
-                  type="password"
-                  placeholder="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded bg-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                />
-              )}
-              {/* Show selected role */}
+              {/* Show selected department */}
               <div className="w-full text-left text-white/80 text-sm mb-2">
-                Role:{' '}
+                Department: {' '}
                 <span className="font-bold text-cyan-300">
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {department.charAt(0).toUpperCase() + department.slice(1)}
                 </span>
               </div>
               <button
@@ -214,13 +247,7 @@ const MainBody: React.FC = () => {
                 disabled={isLoading}
                 className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2 rounded"
               >
-                {isLoading
-                  ? isRegistering
-                    ? 'Registering...'
-                    : 'Signing in...'
-                  : isRegistering
-                  ? 'Register'
-                  : 'Sign In'}
+                {isLoading ? (isRegistering ? 'Registering...' : 'Logging in...') : (isRegistering ? 'Register' : 'Sign In')}
               </button>
             </form>
 
