@@ -116,7 +116,7 @@ const MainBody: React.FC = () => {
       // Handle successful login
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
-      console.log('Login successful:', data);
+ 
       closeModal();
       navigate(`/dashboard/${department}`); // Navigate to the department dashboard
     } catch (err: any) {

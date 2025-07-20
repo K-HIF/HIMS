@@ -13,7 +13,8 @@ type StaffMember = {
   user_full_name: string;
   user_email: string;
   staff_id: string;
-  department: string | null; // Adjusted to string to match your API response
+  department_id: number | null;
+  department: string; // Added department name
   status: boolean;
   verification: boolean;
   date_employed: string;
@@ -24,13 +25,14 @@ const Staff = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const [editData, setEditData] = useState<StaffMember | any>({
+  const [editData, setEditData] = useState<StaffMember>({
     user_full_name: '',
     user_email: '',
     staff_id: '',
-    department: null,
+    department_id: null,
+    department: '', // Reset to empty string
     status: true,
-    verification: true,
+    verification: false,
     date_employed: '',
   });
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -59,16 +61,7 @@ const Staff = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setIsModalOpen(false);
-        setEditData({
-          user_full_name: '',
-          user_email: '',
-          staff_id: '',
-          department: null,
-          status: true,
-          verification: true,
-          date_employed: '',
-        });
+        handleCloseModal();
       }
     };
     if (isModalOpen) {
@@ -90,44 +83,44 @@ const Staff = () => {
     setLoading(true);
     try {
       const [doctors, nurses, pharmacies, labs, receptions, checkouts] = await Promise.all([
-        axios.get(`${BASE_URL}doctors/`),
-        axios.get(`${BASE_URL}nurses/`),
-        axios.get(`${BASE_URL}pharmacies/`),
+        axios.get(`${BASE_URL}doctor/`),
+        axios.get(`${BASE_URL}nurse/`),
+        axios.get(`${BASE_URL}pharmacy/`),
         axios.get(`${BASE_URL}lab/`),
         axios.get(`${BASE_URL}reception/`),
-        axios.get(`${BASE_URL}checkout/`),
+        axios.get(`${BASE_URL}finance/`),
       ]);
 
       const allStaff = [
-        ...doctors.data.map((doc: StaffMember) => ({
+        ...doctors.data.map((doc) => ({
           ...doc,
-          department: doc.department || 'Doctor', // Use the department from the response
+          department: 'Doctor',
         })),
-        ...nurses.data.map((nurse: StaffMember) => ({
+        ...nurses.data.map((nurse) => ({
           ...nurse,
-          department: nurse.department || 'Nurse', // Use the department from the response
+          department: 'Nurse',
         })),
-        ...pharmacies.data.map((pharmacy: StaffMember) => ({
+        ...pharmacies.data.map((pharmacy) => ({
           ...pharmacy,
-          department: pharmacy.department || 'Pharmacy', // Use the department from the response
+          department: 'Pharmacy',
         })),
-        ...labs.data.map((lab: StaffMember) => ({
+        ...labs.data.map((lab) => ({
           ...lab,
-          department: lab.department || 'Lab', // Use the department from the response
+          department: 'Lab',
         })),
-        ...receptions.data.map((reception: StaffMember) => ({
+        ...receptions.data.map((reception) => ({
           ...reception,
-          department: reception.department || 'Reception', // Use the department from the response
+          department: 'Reception',
         })),
-        ...checkouts.data.map((checkout: StaffMember) => ({
+        ...checkouts.data.map((checkout) => ({
           ...checkout,
-          department: checkout.department || 'Checkout', // Use the department from the response
+          department: 'Checkout',
         })),
       ];
 
       setStaff(allStaff);
     } catch (err) {
-      console.error('Error fetching staff:', err.response ? err.response.data : err.message);
+      // Handle error silently, or consider adding user notification
     } finally {
       setLoading(false);
     }
@@ -138,7 +131,7 @@ const Staff = () => {
       const response = await axios.get(`${BASE_URL}departments/`);
       setDepartments(response.data);
     } catch (err) {
-      console.error('Error fetching departments:', err.response ? err.response.data : err.message);
+      // Handle error silently, or consider adding user notification
     }
   };
 
@@ -158,9 +151,10 @@ const Staff = () => {
       user_full_name: '',
       user_email: '',
       staff_id: '',
-      department: null,
+      department_id: null,
+      department: '', // Reset to empty string
       status: true,
-      verification: true,
+      verification: false,
       date_employed: '',
     });
     setIsModalOpen(true);
@@ -172,9 +166,10 @@ const Staff = () => {
       user_full_name: '',
       user_email: '',
       staff_id: '',
-      department: null,
+      department_id: null,
+      department: '', // Reset to empty string
       status: true,
-      verification: true,
+      verification: false,
       date_employed: '',
     });
   };
@@ -185,28 +180,41 @@ const Staff = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!editData.department) {
+    if (editData.department_id === null) {
       alert('Please select a department.');
       return;
     }
     setLoading(true);
     try {
+      const selectedDepartment = departments.find(dept => dept.id === editData.department_id);
+      const departmentName = selectedDepartment ? selectedDepartment.name : '';
+
       if (isEditMode) {
         await axios.put(`${BASE_URL}doctors/${editData.staff_id}/`, {
-          ...editData,
-          department: editData.department,
+          full_name: editData.user_full_name,
+          email: editData.user_email,
+          department_id: editData.department_id,
+          department: departmentName,
+          status: editData.status,
+          verification: editData.verification,
+          date_employed: editData.date_employed,
         });
       } else {
-        await axios.post(`${BASE_URL}doctors/create/`, {
-          ...editData,
-          department: editData.department,
+        await axios.post(`${BASE_URL}admin/register/`, {
+          full_name: editData.user_full_name,
+          email: editData.user_email,
+          department_id: editData.department_id,
+          department: departmentName,
+          status: editData.status,
+          verification: editData.verification,
           staff_id: editData.staff_id || Math.random().toString(36).substring(2, 10),
+          date_employed: editData.date_employed,
         });
       }
       setIsModalOpen(false);
       fetchStaff(); // Refresh staff list
     } catch (err) {
-      console.error('Error saving staff:', err.response ? err.response.data : err.message);
+      // Handle error silently, or consider adding user notification
     } finally {
       setLoading(false);
     }
@@ -237,7 +245,6 @@ const Staff = () => {
               <thead>
                 <tr className="border-b">
                   <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Member</th>
-                  <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Email</th>
                   <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Dept</th>
                   <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Status</th>
                   <th className="pt-6 pb-3 px-4 text-gray-700 font-medium">Verification</th>
@@ -253,10 +260,10 @@ const Staff = () => {
                       <div className="font-medium text-gray-800">{member.user_full_name}</div>
                       <div className="text-sm text-gray-500">{member.user_email}</div>
                     </td>
-                    <td className="py-4 px-4">{member.department}</td>
+                    <td className="py-4 px-4">{member.department || 'N/A'}</td>
                     <td className={`py-4 px-4 ${member.status ? 'text-green-600' : 'text-red-500'}`}>{member.status ? 'Active' : 'Inactive'}</td>
                     <td className={`py-4 px-4 ${member.verification ? 'text-green-600' : 'text-red-500'}`}>{member.verification ? 'Verified' : 'Unverified'}</td>
-                    <td className="py-4 px-4">{member.date_employed}</td>
+                    <td className="py-4 px-4">{member.date_employed.split("T")[0]}</td>
                     <td className="py-4 px-4">{member.staff_id}</td>
                     <td className="py-4 px-4">
                       <button onClick={() => handleEditClick(member)} className="text-blue-500 hover:text-blue-700 transform transition-transform duration-200 hover:scale-110">
@@ -296,19 +303,19 @@ const Staff = () => {
                     <span className="font-medium text-gray-800">Department:</span> {member.department || 'N/A'}
                   </p>
                   <p>
-                    <span className="font-medium text-gray-800">Status:</span> 
+                    <span className="font-medium text-gray-800">Status:</span>
                     <span className={member.status ? 'text-green-600' : 'text-red-500'}>
                       {member.status ? 'Active' : 'Inactive'}
                     </span>
                   </p>
                   <p>
-                    <span className="font-medium text-gray-800">Verification:</span> 
+                    <span className="font-medium text-gray-800">Verification:</span>
                     <span className={member.verification ? 'text-green-600' : 'text-red-500'}>
                       {member.verification ? 'Verified' : 'Unverified'}
                     </span>
                   </p>
                   <p>
-                    <span className="font-medium text-gray-800">Employed:</span> {member.date_employed}
+                    <span className="font-medium text-gray-800">Employed:</span> {member.date_employed.split("T")[0]}
                   </p>
                   <p>
                     <span className="font-medium text-gray-800">Staff ID:</span> {member.staff_id}
@@ -331,29 +338,40 @@ const Staff = () => {
             <form className="space-y-4" onSubmit={handleSubmit}>
               <input type="text" name="user_full_name" value={editData.user_full_name} onChange={handleChange} placeholder="Name" className="w-full border rounded-md px-3 py-2" required />
               <input type="email" name="user_email" value={editData.user_email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" required />
-              <select name="department" value={editData.department || ''} onChange={e => {
-                const selectedDepartment = departments.find(d => d.id === Number(e.target.value));
-                setEditData({ ...editData, department: selectedDepartment ? selectedDepartment.name : null });
-              }} className="w-full border rounded-md px-3 py-2" required>
-                <option value="">Select Department</option>
+
+              <select
+                name="department_id"
+                value={editData.department_id || ''}
+                onChange={e => {
+                  const selectedId = Number(e.target.value);
+                  setEditData({ ...editData, department_id: selectedId });
+                }}
+                className="w-full border rounded-md px-3 py-2"
+                required
+              >
+                <option key="placeholder" value="">Select Department</option>
                 {departments.map((dept) => (
                   <option key={dept.id} value={dept.id}>{dept.name}</option>
                 ))}
               </select>
+
               <select name="status" value={editData.status ? 'Active' : 'Inactive'} onChange={e => {
                 setEditData({ ...editData, status: e.target.value === 'Active' });
               }} className="w-full border rounded-md px-3 py-2">
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
               </select>
+
               <select name="verification" value={editData.verification ? 'Verified' : 'Unverified'} onChange={e => {
                 setEditData({ ...editData, verification: e.target.value === 'Verified' });
               }} className="w-full border rounded-md px-3 py-2">
                 <option value="Verified">Verified</option>
                 <option value="Unverified">Unverified</option>
               </select>
-              <input type="date" name="date_employed" value={editData.date_employed} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
+
+              <input type="date" name="date_employed" value={editData.date_employed?.slice(0, 10) || ''} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
               <input type="text" name="staff_id" value={editData.staff_id || ''} onChange={handleChange} placeholder="Staff ID" className="w-full border rounded-md px-3 py-2" required />
+              
               <div className="flex justify-end pt-4">
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2" disabled={loading}>
                   {loading && <span className="loader border-2 border-t-2 border-gray-200 border-t-blue-500 rounded-full w-4 h-4 mr-2 animate-spin"></span>}

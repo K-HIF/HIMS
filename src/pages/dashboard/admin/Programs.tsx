@@ -16,7 +16,11 @@ type Program = {
   endYear?: string;
 };
 
-const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+//const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+const BASE_URL = 'http://localhost:8000';
+
+const ACCESS_TOKEN = localStorage.getItem('access');
+
 
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -25,7 +29,7 @@ const Programs = () => {
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [loading, setLoading] = useState(false); // Loading state for fetching and submitting
+  const [loading, setLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const [editData, setEditData] = useState<Program>({
@@ -38,14 +42,18 @@ const Programs = () => {
 
   useEffect(() => {
     const fetchPrograms = async () => {
-      setLoading(true); // Set loading to true when fetching
+      setLoading(true);
       try {
-        const res = await axios.get(`${BASE_URL}/api/users/programs/`);
+        const res = await axios.get(`${BASE_URL}/api/users/programs/`, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
         setPrograms(res.data);
       } catch (err) {
         console.error('Failed to fetch programs:', err);
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
     fetchPrograms();
@@ -104,20 +112,32 @@ const Programs = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true when submitting
+    setLoading(true);
     try {
       if (isEditMode && editData.id) {
-        await axios.put(`${BASE_URL}/api/users/programs/${editData.id}/`, editData);
+        await axios.put(`${BASE_URL}/api/users/programs/${editData.id}/`, editData, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
       } else {
-        await axios.post(`${BASE_URL}/api/users/programs/`, editData);
+        await axios.post(`${BASE_URL}/api/users/programs/`, editData, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
       }
-      const res = await axios.get(`${BASE_URL}/api/users/programs/`);
+      const res = await axios.get(`${BASE_URL}/api/users/programs/`, {
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+        },
+      });
       setPrograms(res.data);
       handleCloseModal();
     } catch (err) {
       console.error('Failed to save program:', err);
     } finally {
-      setLoading(false); // Set loading to false after submitting
+      setLoading(false);
     }
   };
 

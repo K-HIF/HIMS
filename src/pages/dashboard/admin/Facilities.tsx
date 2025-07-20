@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/';
+const BASE_URL = 'http://127.0.0.1:8000';
+const ACCESS_TOKEN = localStorage.getItem('access');
 
 type ContextType = {
   searchTerm: string;
@@ -63,7 +64,11 @@ const Facilities = () => {
   const fetchFacilities = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/api/users/facilities`);
+      const res = await axios.get(`${BASE_URL}/api/users/facilities`, {
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+        },
+      });
       setFacilities(res.data);
     } catch (err) {
       console.error('Error fetching facilities:', err);
@@ -101,9 +106,17 @@ const Facilities = () => {
     setModalLoading(true);
     try {
       if (isEditMode && editData.id) {
-        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}`, editData);
+        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}`, editData, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
       } else {
-        await axios.post(`${BASE_URL}/api/users/facilities/`, editData);
+        await axios.post(`${BASE_URL}/api/users/facilities/`, editData, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
       }
       await fetchFacilities();
       handleCloseModal();

@@ -13,10 +13,9 @@ type Provider = {
   plan: string[];
   status: string;
   since: string;
-  logo: string;
 };
 
-const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
+const BASE_URL = 'http://localhost:8000';
 
 const InsuranceProviders = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -34,18 +33,28 @@ const InsuranceProviders = () => {
     plan: [],
     status: 'Active',
     since: '',
-    logo: 'https://via.placeholder.com/40?text=🏥',
   });
 
+  const ACCESS_TOKEN = localStorage.getItem('access');
+  
   useEffect(() => {
     const fetchProviders = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${BASE_URL}/api/users/insurance-providers/`);
+        const response = await fetch(`${BASE_URL}/api/users/insurance-providers/`, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
         const data = await response.json();
-        setProviders(data);
+
+        if (Array.isArray(data)) {
+          setProviders(data);
+        } else {
+          setProviders([]); // Set to an empty array if not valid
+        }
       } catch (error) {
-        console.error('Failed to fetch providers', error);
+        setProviders([]); // Handle error case
       } finally {
         setLoading(false);
       }
@@ -93,7 +102,6 @@ const InsuranceProviders = () => {
       plan: [],
       status: 'Active',
       since: '',
-      logo: 'https://via.placeholder.com/40?text=🏥',
     });
     setIsModalOpen(true);
   };
@@ -103,16 +111,16 @@ const InsuranceProviders = () => {
     setSelectedProvider(null);
   };
 
- const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  const { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
 
-  if (name === 'plan' && e.target instanceof HTMLSelectElement) {
-    const plans = Array.from(e.target.selectedOptions, (option) => option.value);
-    setEditData({ ...editData, plan: plans });
-  } else {
-    setEditData({ ...editData, [name]: value });
-  }
-};
+    if (name === 'plan' && e.target instanceof HTMLSelectElement) {
+      const plans = Array.from(e.target.selectedOptions, (option) => option.value);
+      setEditData({ ...editData, plan: plans });
+    } else {
+      setEditData({ ...editData, [name]: value });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,7 +133,10 @@ const InsuranceProviders = () => {
 
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+        },
         body: JSON.stringify(editData),
       });
 
@@ -139,7 +150,7 @@ const InsuranceProviders = () => {
 
       handleCloseModal();
     } catch (error) {
-      console.error('Failed to save provider', error);
+      // Handle error case
     } finally {
       setLoading(false);
     }
@@ -185,7 +196,6 @@ const InsuranceProviders = () => {
                   <tr key={provider.id} className="hover:bg-gray-50 border-b">
                     <td className="py-4 px-4">
                       <div className="flex items-start gap-3">
-                        
                         <div>
                           <div className="font-medium text-gray-800">{provider.name}</div>
                           <div className="text-sm text-gray-500">{provider.email}</div>
@@ -229,7 +239,6 @@ const InsuranceProviders = () => {
               >
                 <div className="flex justify-between items-center">
                   <div className="flex items-start gap-3">
-                    
                     <div>
                       <h2 className="text-base font-semibold text-gray-900">{provider.name}</h2>
                       <p className="text-sm text-gray-500">{provider.email}</p>
