@@ -20,7 +20,6 @@ type Program = {
 const BASE_URL = import.meta.env.VITE_API_BASE_URL||'http://127.0.0.1:8000';
 
 const ACCESS_TOKEN = localStorage.getItem('access');
-console.log('Access Token:', ACCESS_TOKEN);
 
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
