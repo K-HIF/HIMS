@@ -16,8 +16,8 @@ const MainBody: React.FC = () => {
   const [department, setDepartment] = useState<string>('admin');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-  const BASE_URL = import.meta.env.VITE_BASE_URL  // Use env variable
-
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://127.0.0.1:8000' // Use env variable
+ 
   const departmentOptions = [
     { label: 'Admin', value: 'admin' },
     { label: 'Doctor', value: 'doctor' },
@@ -32,7 +32,7 @@ const MainBody: React.FC = () => {
     setIsRegistering((prev) => !prev);
     setIsLoading(false);
   };
-
+  
   const closeModal = () => {
     setShowModal(false);
     setIsRegistering(false);
