@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_BASE_URL||'http://127.0.0.1:8000';
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://127.0.0.1:8000';
 const ACCESS_TOKEN = localStorage.getItem('access');
 
 type ContextType = {
@@ -33,7 +33,6 @@ const Facilities = () => {
     count: 0,
     occupied: 0,
   });
-  
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');
@@ -59,28 +58,24 @@ const Facilities = () => {
   }, [isModalOpen, selectedFacility]);
 
   useEffect(() => {
-     if (ACCESS_TOKEN) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${ACCESS_TOKEN}`;
-    fetchFacilities();
-  }
-    
-  }, []);
+    const fetchFacilities = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
+          headers: {
+            Authorization: `Bearer ${ACCESS_TOKEN}`,
+          },
+        });
+        setFacilities(res.data);
+      } catch (err) {
+        console.error('Error fetching facilities:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchFacilities = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
-        headers: {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
-        },
-      });
-      setFacilities(res.data);
-    } catch (err) {
-      console.error('Error fetching facilities:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchFacilities();
+  }, []);
 
   const handleAddClick = () => {
     setIsEditMode(false);
@@ -107,11 +102,12 @@ const Facilities = () => {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setModalLoading(true);
     try {
       if (isEditMode && editData.id) {
-        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}`, editData, {
+        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}/`, editData, {
           headers: {
             Authorization: `Bearer ${ACCESS_TOKEN}`,
           },

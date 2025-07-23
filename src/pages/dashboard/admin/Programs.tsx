@@ -16,10 +16,7 @@ type Program = {
   endYear?: string;
 };
 
-//const BASE_URL = 'https://healthmgmt-7ztg.onrender.com';
-const BASE_URL = import.meta.env.VITE_BASE_URL||'http://127.0.0.1:8000';
-
-const ACCESS_TOKEN = localStorage.getItem('access');
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://127.0.0.1:8000';
 
 const Programs = () => {
   const { searchTerm } = useOutletContext<ContextType>();
@@ -38,28 +35,32 @@ const Programs = () => {
     startYear: '',
     endYear: '',
   });
-  
+
+  useEffect(() => {
+    const ACCESS_TOKEN = localStorage.getItem('access');
+
+    if (ACCESS_TOKEN) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+    }
+  }, []);
+
   useEffect(() => {
     const fetchPrograms = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${BASE_URL}/api/users/programs/`, {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-          },
-        });
-        setPrograms(res.data);
+        const [programsResponse] = await Promise.all([
+          axios.get(`${BASE_URL}/api/users/programs/`),
+        ]);
+
+        setPrograms(programsResponse.data);
       } catch (err) {
         console.error('Failed to fetch programs:', err);
       } finally {
         setLoading(false);
       }
     };
-     if (ACCESS_TOKEN) {
-        axios.defaults.headers.common["Authorization"] = `Bearer ${ACCESS_TOKEN}`;
-        fetchPrograms();
-      }
-   
+
+    fetchPrograms();
   }, []);
 
   useEffect(() => {
@@ -117,6 +118,7 @@ const Programs = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      const ACCESS_TOKEN = localStorage.getItem('access');
       if (isEditMode && editData.id) {
         await axios.put(`${BASE_URL}/api/users/programs/${editData.id}/`, editData, {
           headers: {
