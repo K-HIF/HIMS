@@ -57,23 +57,23 @@ const Facilities = () => {
     };
   }, [isModalOpen, selectedFacility]);
 
-  useEffect(() => {
-    const fetchFacilities = async () => {
-      setLoading(true);
-      try {
-        const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-          },
-        });
-        setFacilities(res.data);
-      } catch (err) {
-        console.error('Error fetching facilities:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchFacilities = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
+        headers: {
+          Authorization: `Bearer ${ACCESS_TOKEN}`,
+        },
+      });
+      setFacilities(res.data);
+    } catch (err) {
+      console.error('Error fetching facilities:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchFacilities();
   }, []);
 
@@ -119,7 +119,7 @@ const Facilities = () => {
           },
         });
       }
-      await fetchFacilities();
+      await fetchFacilities(); // Ensure fetchFacilities is called after saving
       handleCloseModal();
     } catch (err) {
       console.error('Error saving facility:', err);
