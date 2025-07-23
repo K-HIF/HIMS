@@ -4,7 +4,6 @@ import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://127.0.0.1:8000';
-const ACCESS_TOKEN = localStorage.getItem('access');
 
 type ContextType = {
   searchTerm: string;
@@ -57,23 +56,24 @@ const Facilities = () => {
     };
   }, [isModalOpen, selectedFacility]);
 
-  const fetchFacilities = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
-        headers: {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
-        },
-      });
-      setFacilities(res.data);
-    } catch (err) {
-      console.error('Error fetching facilities:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchFacilities = async () => {
+      setLoading(true);
+      try {
+        const ACCESS_TOKEN = localStorage.getItem('access');
+        if (ACCESS_TOKEN) {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/users/facilities/`);
+        setFacilities(response.data);
+      } catch (err) {
+        console.error('Error fetching facilities:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchFacilities();
   }, []);
 
@@ -106,20 +106,19 @@ const Facilities = () => {
     e.preventDefault();
     setModalLoading(true);
     try {
-      if (isEditMode && editData.id) {
-        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}/`, editData, {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-          },
-        });
-      } else {
-        await axios.post(`${BASE_URL}/api/users/facilities/`, editData, {
-          headers: {
-            Authorization: `Bearer ${ACCESS_TOKEN}`,
-          },
-        });
+      const ACCESS_TOKEN = localStorage.getItem('access');
+      if (ACCESS_TOKEN) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${ACCESS_TOKEN}`;
       }
-      await fetchFacilities(); // Ensure fetchFacilities is called after saving
+
+      if (isEditMode && editData.id) {
+        await axios.put(`${BASE_URL}/api/users/facilities/${editData.id}/`, editData);
+      } else {
+        await axios.post(`${BASE_URL}/api/users/facilities/`, editData);
+      }
+
+      const response = await axios.get(`${BASE_URL}/api/users/facilities/`);
+      setFacilities(response.data);
       handleCloseModal();
     } catch (err) {
       console.error('Error saving facility:', err);
