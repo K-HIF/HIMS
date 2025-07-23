@@ -10,9 +10,9 @@ const MainBody: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState('frandelwanjawa19@gmail.com');
   const [fullName, setFullName] = useState('');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('admin1234');
   const [department, setDepartment] = useState<string>('admin');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
