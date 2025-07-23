@@ -56,7 +56,11 @@ const Programs = () => {
         setLoading(false);
       }
     };
-    fetchPrograms();
+     if (ACCESS_TOKEN) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${ACCESS_TOKEN}`;
+        fetchPrograms();
+      }
+   
   }, []);
 
   useEffect(() => {
@@ -227,7 +231,7 @@ const Programs = () => {
               </div>
               <div className="text-sm text-gray-700">
                 <p>
-                  <span className="font-medium text-gray-800">Status:</span> 
+                  <span className="font-medium text-gray-800">Status:</span>
                   <span className={p.status === 'Active' ? 'text-green-600' : 'text-red-500'}>
                     {p.status}
                   </span>

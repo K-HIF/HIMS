@@ -1,0 +1,82 @@
+.register-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Space between top and bottom layers */
+    height: 100vh; /* Full height */
+    padding: 20px;
+    position: relative;
+}
+
+.layered-divs {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px; /* Optional max width */
+}
+
+.layer {
+    background-color: grey;
+    color: white;
+    padding: 30px; /* Increased padding for larger divs */
+    margin: 15px 0; /* Space between divs */
+    cursor: pointer;
+    text-align: center;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.layer:hover {
+    background-color: #555; /* Darker grey on hover */
+}
+
+.layer.active {
+    background-color: green; /* Active state color */
+}
+
+.form-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+@media (max-width: 600px) {
+    .layer {
+        padding: 40px; /* Increase for small screens */
+    }
+
+    .form-modal {
+        width: 90%;
+    }
+}
+.partitions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.partition {
+    background-color: grey;
+    color: white;
+    padding: 20px;
+    margin: 10px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    width: 80px; /* Adjust width as needed */
+}
+
+.partition:hover {
+    background-color: #555; /* Darker grey on hover */
+}
+
+.partition.active {
+    background-color: green; /* Active state color */
+}

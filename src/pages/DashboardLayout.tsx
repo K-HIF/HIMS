@@ -5,7 +5,9 @@ import { Outlet, useParams } from 'react-router-dom';
 
 const DashboardLayout: React.FC<{ role?: string }> = ({ role }) => {
   const params = useParams();
-  const currentRole = role || params.role || 'admin';
+  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentRole = storedUser?.department?.toLowerCase() || role || params.role || 'admin';
+  console.log("Current role:", currentRole);
   const [selectedPage, setSelectedPage] = useState('Dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -31,9 +33,8 @@ const DashboardLayout: React.FC<{ role?: string }> = ({ role }) => {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`z-40 fixed md:static top-0 left-0 h-full transition-transform duration-300 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } md:translate-x-0`}
+        className={`z-40 fixed md:static top-0 left-0 h-full transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0`}
       >
         <Sidebar
           selectedPage={selectedPage}

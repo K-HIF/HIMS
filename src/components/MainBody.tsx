@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin
 import medicImage from '../assets/medic3.jpg';
 
 const MainBody: React.FC = () => {
@@ -12,10 +13,10 @@ const MainBody: React.FC = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [password, setPassword] = useState('');
-  const [department, setDepartment] = useState<string>('admin'); 
+  const [department, setDepartment] = useState<string>('admin');
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
-  const BASE_URL = 'http://127.0.0.1:8000';
+  const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://127.0.0.1:8000'; // Use env variable
 
   const departmentOptions = [
     { label: 'Admin', value: 'admin' },
@@ -37,8 +38,8 @@ const MainBody: React.FC = () => {
     setIsRegistering(false);
     setEmail('');
     setFullName('');
-    setPassword(''); 
-    setDepartment('admin'); // Reset department to default
+    setPassword('');
+    setDepartment('admin');
     setShowRoleDropdown(false);
   };
 
@@ -74,9 +75,9 @@ const MainBody: React.FC = () => {
     setIsLoading(true);
     try {
       const url = `${BASE_URL}/api/users/register/`;
-      const payload = isRegistering && department === 'admin' 
-        ? { email, fullName, password, department } // Use department instead of role
-        : { email, fullName, department }; // No password for non-admin departments
+      const payload = isRegistering && department === 'admin'
+        ? { email, fullName, password, department }
+        : { email, fullName, department };
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,26 +106,65 @@ const MainBody: React.FC = () => {
       });
       const data = await res.json();
       localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Assuming the backend now sends department instead of role
+      console.log("User data:", data.user.department);
       if (data.user.department !== department) {
         alert(`Login failed: Account doesn't have access to ${department} dashboard.`);
         return;
       }
 
       if (!res.ok) throw new Error(data.detail || 'Something went wrong');
-      // Handle successful login
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
- 
+
       closeModal();
-      navigate(`/dashboard/${department}`); // Navigate to the department dashboard
+      navigate(`/dashboard/${data.user.department}`);
     } catch (err: any) {
       alert(err.message);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/users/google/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: credentialResponse.credential,
+          department: department,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || 'Something went wrong');
+      }
+
+      if (!data.access || !data.user) {
+        alert(data.detail || 'Your account is not yet verified');
+        return;
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+      console.log("User data:", data.user.department);
+      navigate(`/dashboard/${data.user.department}`);
+
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
 
   return (
     <main className="w-full min-h-screen relative pt-24 text-white home">
@@ -257,17 +297,11 @@ const MainBody: React.FC = () => {
               <hr className="flex-grow border-white/30" />
             </div>
 
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2 bg-white text-gray-800 font-medium py-2 px-4 rounded hover:bg-gray-200 transition"
-            >
-              <img
-                src="https://img.icons8.com/color/16/000000/google-logo.png"
-                alt="Google"
-                className="w-5 h-5"
-              />
-              {isRegistering ? 'Register with Google' : 'Sign in with Google'}
-            </button>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess} 
+              onError={() => alert('Login failed.')}
+              
+            />
 
             <p className="mt-6 text-sm text-white/70">
               {isRegistering ? 'Already have an account?' : 'New to MedicApp?'}{' '}

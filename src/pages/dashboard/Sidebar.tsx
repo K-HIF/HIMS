@@ -118,6 +118,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleItemClick = (label: string, route: string) => {
     onSelect(label);
+    console.log("Sidebar rendered with role:", role);
+
     navigate(route.replace(':role', role));
     setIsSidebarOpen(false); // close on mobile
   };

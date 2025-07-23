@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
-import './Overview.css';
+import '../admin/Overview.css';
 
 const LaboratoryDashboard = () => {
   const barChartRef = useRef(null);

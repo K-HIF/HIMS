@@ -14,7 +14,8 @@ type StaffMember = {
   user_email: string;
   staff_id: string;
   department_id: number | null;
-  department: string; // Added department name
+  user_id: number;
+  department: string;
   status: boolean;
   verification: boolean;
   date_employed: string;
@@ -29,6 +30,7 @@ const Staff = () => {
     user_full_name: '',
     user_email: '',
     staff_id: '',
+    user_id: 0,
     department_id: null,
     department: '', // Reset to empty string
     status: true,
@@ -43,6 +45,7 @@ const Staff = () => {
   // Set authorization header
   useEffect(() => {
     const accessToken = localStorage.getItem('access');
+    
     if (accessToken) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
     }
@@ -92,27 +95,27 @@ const Staff = () => {
       ]);
 
       const allStaff = [
-        ...doctors.data.map((doc) => ({
+        ...doctors.data.map((doc:any) => ({
           ...doc,
           department: 'Doctor',
         })),
-        ...nurses.data.map((nurse) => ({
+        ...nurses.data.map((nurse:any) => ({
           ...nurse,
           department: 'Nurse',
         })),
-        ...pharmacies.data.map((pharmacy) => ({
+        ...pharmacies.data.map((pharmacy:any) => ({
           ...pharmacy,
           department: 'Pharmacy',
         })),
-        ...labs.data.map((lab) => ({
+        ...labs.data.map((lab:any) => ({
           ...lab,
           department: 'Lab',
         })),
-        ...receptions.data.map((reception) => ({
+        ...receptions.data.map((reception:any) => ({
           ...reception,
           department: 'Reception',
         })),
-        ...checkouts.data.map((checkout) => ({
+        ...checkouts.data.map((checkout:any) => ({
           ...checkout,
           department: 'Checkout',
         })),
@@ -141,9 +144,14 @@ const Staff = () => {
 
   const handleEditClick = (member: StaffMember) => {
     setIsEditMode(true);
-    setEditData(member);
+    setEditData({
+      ...member,
+      department_id: member.department_id, // Ensure department_id is included
+      department: member.department, // Ensure department name is included
+    });
     setIsModalOpen(true);
   };
+
 
   const handleAddClick = () => {
     setIsEditMode(false);
@@ -151,8 +159,9 @@ const Staff = () => {
       user_full_name: '',
       user_email: '',
       staff_id: '',
+      user_id: 0,
       department_id: null,
-      department: '', // Reset to empty string
+      department: '',
       status: true,
       verification: false,
       date_employed: '',
@@ -166,6 +175,7 @@ const Staff = () => {
       user_full_name: '',
       user_email: '',
       staff_id: '',
+      user_id: 0,
       department_id: null,
       department: '', // Reset to empty string
       status: true,
@@ -180,45 +190,44 @@ const Staff = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Ensure department_id is set
     if (editData.department_id === null) {
       alert('Please select a department.');
       return;
     }
+
     setLoading(true);
     try {
-      const selectedDepartment = departments.find(dept => dept.id === editData.department_id);
-      const departmentName = selectedDepartment ? selectedDepartment.name : '';
+      
+      const departmentName = editData.department;
+      const url = `${BASE_URL}${departmentName}/${editData.user_id}/`; 
+
 
       if (isEditMode) {
-        await axios.put(`${BASE_URL}doctors/${editData.staff_id}/`, {
-          full_name: editData.user_full_name,
-          email: editData.user_email,
+        await axios.put(url, {
+          user_full_name: editData.user_full_name,
+          user_email: editData.user_email,
           department_id: editData.department_id,
           department: departmentName,
           status: editData.status,
           verification: editData.verification,
           date_employed: editData.date_employed,
+          staff_id: editData.staff_id,
         });
       } else {
-        await axios.post(`${BASE_URL}admin/register/`, {
-          full_name: editData.user_full_name,
-          email: editData.user_email,
-          department_id: editData.department_id,
-          department: departmentName,
-          status: editData.status,
-          verification: editData.verification,
-          staff_id: editData.staff_id || Math.random().toString(36).substring(2, 10),
-          date_employed: editData.date_employed,
-        });
+        // Handle adding a new staff member
       }
+
       setIsModalOpen(false);
       fetchStaff(); // Refresh staff list
     } catch (err) {
-      // Handle error silently, or consider adding user notification
+      console.error(err); // Log the error for debugging
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 pt-1 flex flex-col items-center w-full">
@@ -339,21 +348,30 @@ const Staff = () => {
               <input type="text" name="user_full_name" value={editData.user_full_name} onChange={handleChange} placeholder="Name" className="w-full border rounded-md px-3 py-2" required />
               <input type="email" name="user_email" value={editData.user_email} onChange={handleChange} placeholder="Email" className="w-full border rounded-md px-3 py-2" required />
 
-              <select
-                name="department_id"
-                value={editData.department_id || ''}
-                onChange={e => {
-                  const selectedId = Number(e.target.value);
-                  setEditData({ ...editData, department_id: selectedId });
-                }}
-                className="w-full border rounded-md px-3 py-2"
-                required
-              >
-                <option key="placeholder" value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept.id} value={dept.id}>{dept.name}</option>
-                ))}
-              </select>
+              {/* Display department name in edit mode */}
+              {isEditMode ? (
+                <div className="w-full border rounded-md px-3 py-2 bg-gray-100">
+                  {editData.department}
+                </div>
+              ) : (
+                <select
+                  name="department_id"
+                  value={editData.department_id || ''}
+                  onChange={e => {
+                    const selectedId = Number(e.target.value);
+                    setEditData({ ...editData, department_id: selectedId });
+                  }}
+                  className="w-full border rounded-md px-3 py-2"
+                  required
+                >
+                  <option key="placeholder" value="">Select Department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              )}
 
               <select name="status" value={editData.status ? 'Active' : 'Inactive'} onChange={e => {
                 setEditData({ ...editData, status: e.target.value === 'Active' });
@@ -371,7 +389,7 @@ const Staff = () => {
 
               <input type="date" name="date_employed" value={editData.date_employed?.slice(0, 10) || ''} onChange={handleChange} className="w-full border rounded-md px-3 py-2" required />
               <input type="text" name="staff_id" value={editData.staff_id || ''} onChange={handleChange} placeholder="Staff ID" className="w-full border rounded-md px-3 py-2" required />
-              
+
               <div className="flex justify-end pt-4">
                 <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm flex items-center gap-2" disabled={loading}>
                   {loading && <span className="loader border-2 border-t-2 border-gray-200 border-t-blue-500 rounded-full w-4 h-4 mr-2 animate-spin"></span>}

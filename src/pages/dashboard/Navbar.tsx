@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Star, ThumbsDown, Menu, Search, X } from 'lucide-react';
+import { Star, ThumbsDown, ThumbsUp, Menu, Search, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const repositoryUrl = 'https://github.com/K-HIF/HIMS';
@@ -25,6 +25,9 @@ const Navbar: React.FC<NavbarProps> = ({
   const [starCount, setStarCount] = useState<number | null>(null);
   const [downvoteCount, setDownvoteCount] = useState<number>(0);
   const [hasDownvoted, setHasDownvoted] = useState<boolean>(false);
+  const [loadingUpvote, setLoadingUpvote] = useState<boolean>(false);
+  const [upvoteCount, setUpvoteCount] = useState<number>(0);
+  const [hasUpvoted, setHasUpvoted] = useState<boolean>(false);
   const [loadingDownvote, setLoadingDownvote] = useState<boolean>(false);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
 
@@ -66,11 +69,23 @@ const Navbar: React.FC<NavbarProps> = ({
         setDownvoteCount(0);
       }
     };
+    const fetchUpvotes = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/users/upvotes/`);
+        const data = await response.json();
+        setUpvoteCount(data?.count ?? 0);
+      } catch (error) {
+        console.error('Failed to fetch upvote count:', error);
+        setUpvoteCount(0);
+      }
+    };
 
+    setHasUpvoted(sessionStorage.getItem('upvoted') === 'true');
     setHasDownvoted(sessionStorage.getItem('downvoted') === 'true');
 
     fetchStars();
     fetchDownvotes();
+    fetchUpvotes();
   }, []);
 
   // Downvote handler
@@ -109,6 +124,45 @@ const Navbar: React.FC<NavbarProps> = ({
       toast.error(err.message || 'Something went wrong.');
     } finally {
       setLoadingDownvote(false);
+    }
+  };
+  //upvote handler
+
+  const handleUpvote = async () => {
+    const token = localStorage.getItem('access');
+    if (!token) {
+      toast.error('Please log in to upvote.');
+      return;
+    }
+
+    if (hasUpvoted) {
+      toast.info('You have already upvoted in this session.');
+      return;
+    }
+
+    try {
+      setLoadingUpvote(true);
+      const res = await fetch(`${BASE_URL}/api/users/upvote/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.detail || 'Failed to upvote.');
+      }
+
+      sessionStorage.setItem('upvoted', 'true');
+      setHasUpvoted(true);
+      setUpvoteCount(data.count ?? upvoteCount + 1); // use server count if available
+      toast.success('Thanks for your feedback.');
+    } catch (err: any) {
+      toast.error(err.message || 'Something went wrong.');
+    } finally {
+      setLoadingUpvote(false);
     }
   };
 
@@ -177,23 +231,36 @@ const Navbar: React.FC<NavbarProps> = ({
           className="flex items-center gap-1 text-black text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-100"
         >
           <Star size={16} />
-          Star
+          
         </a>
         <span className="text-gray-700 text-sm">
           {starCount !== null ? starCount : '...'}
         </span>
 
         <button
-          onClick={handleDownvote}
-          disabled={hasDownvoted || loadingDownvote}
-          className={`flex items-center gap-1 text-sm px-3 py-1 border rounded ${
-            hasDownvoted
+          onClick={handleUpvote}
+          disabled={hasUpvoted || loadingUpvote}
+          className={`flex items-center gap-1 text-sm px-3 py-1 border rounded ${hasUpvoted
               ? 'text-gray-400 border-gray-300 cursor-not-allowed'
               : 'text-gray-700 border-gray-300 hover:bg-gray-100'
-          }`}
+            }`}
+        >
+          <ThumbsUp size={16} />
+          {loadingUpvote ? 'Voting...' : hasUpvoted ? '' : 'Upvote'}
+        </button>
+
+        <span className="text-gray-700 text-sm">{upvoteCount}</span>
+
+        <button
+          onClick={handleDownvote}
+          disabled={hasDownvoted || loadingDownvote}
+          className={`flex items-center gap-1 text-sm px-3 py-1 border rounded ${hasDownvoted
+              ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+              : 'text-gray-700 border-gray-300 hover:bg-gray-100'
+            }`}
         >
           <ThumbsDown size={16} />
-          {loadingDownvote ? 'Voting...' : hasDownvoted ? 'Downvoted' : 'Downvote'}
+          {loadingDownvote ? 'Voting...' : hasDownvoted ? 'Downvoted' : ''}
         </button>
         <span className="text-gray-700 text-sm">{downvoteCount}</span>
       </div>

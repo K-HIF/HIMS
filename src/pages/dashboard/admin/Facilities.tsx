@@ -58,13 +58,17 @@ const Facilities = () => {
   }, [isModalOpen, selectedFacility]);
 
   useEffect(() => {
+     if (ACCESS_TOKEN) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${ACCESS_TOKEN}`;
     fetchFacilities();
+  }
+    
   }, []);
 
   const fetchFacilities = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/api/users/facilities`, {
+      const res = await axios.get(`${BASE_URL}/api/users/facilities/`, {
         headers: {
           Authorization: `Bearer ${ACCESS_TOKEN}`,
         },

@@ -1,12 +1,13 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+
 import 'react-toastify/dist/ReactToastify.css';
 
 import Home from './pages/Home';
 import DashboardLayout from './pages/DashboardLayout';
 import NotFound from './pages/NotFound';
 import Overview from './pages/dashboard/admin/Overview';
-import Patients from './pages/dashboard/Patients';
+//import Patients from './pages/dashboard/Patients';
 import Departments from './pages/dashboard/admin/Departments';
 import Programs from './pages/dashboard/admin/Programs';
 import InsuranceClaims from './pages/dashboard/InsuranceClaims';
@@ -19,6 +20,7 @@ import NurseDashboard from './pages/dashboard/nurse/NurseDashboard';
 import ReceptionDashboard from './pages/dashboard/reception/ReceptionDashboard';
 import CheckoutDashboard from './pages/dashboard/billing/CheckoutDashboard';
 import PharmacyDashboard from './pages/dashboard/pharmacy/PharmacyDashboard';
+import LabDashboard from './pages/dashboard/lab/LaboratoryDashboard.tsx';
 import Staff from './pages/dashboard/admin/Staff';
 import Facilities from './pages/dashboard/admin/Facilities';
 import Testing from './pages/dashboard/admin/Testing';
@@ -61,75 +63,84 @@ const RoleBasedDashboard = () => {
 };
 
 const App = () => {
+    
+
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Home />} />
+   
+    
+      <>
+      
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        {/* Role-based dashboard routing */}
-        <Route path="/dashboard/*" element={<RoleBasedDashboard />}> {/* Pass role to layout */}
-          <Route path="admin" element={<Overview />} />
-          <Route path="doctor" element={<DoctorDashboard />} />
-          <Route path="nurse" element={<NurseDashboard />} />
-          <Route path="reception" element={<ReceptionDashboard />} />
-          <Route path="checkout" element={<CheckoutDashboard />} />
-          <Route path="pharmacy" element={<PharmacyDashboard />} />
-          
-          <Route path=":role/patients" element={<Patients />} />
-          <Route path=":role/departments" element={<Departments />} />
-          <Route path=":role/programs" element={<Programs />} />
-          <Route path=":role/insurance-claims" element={<InsuranceClaims />} />
-         
-          <Route path=":role/profile" element={<Profile />} />
-          <Route path=":role/logout" element={<Logout />} />
-          <Route path=":role/documentation" element={<Documentation />} />
+          {/* Role-based dashboard routing */}
+          <Route path="/dashboard/*" element={<RoleBasedDashboard />}>
+            {/* Admin Routes */}
+            <Route path="admin" element={<Overview />} />
+            <Route path="admin/departments" element={<Departments />} />
+            <Route path="admin/programs" element={<Programs />} />
+            <Route path="admin/insurance-claims" element={<InsuranceClaims />} />
+            <Route path="admin/profile" element={<Profile />} />
+            <Route path="admin/logout" element={<Logout />} />
+            <Route path="admin/documentation" element={<Documentation />} />
+            <Route path="admin/staff" element={<Staff />} />
+            <Route path="admin/insurance" element={<InsuranceProviders />} />
+            <Route path="admin/facilities" element={<Facilities />} />
+            <Route path="admin/testing" element={<Testing />} />
 
-          {/* Admin */}
-          <Route path=":role/staff" element={<Staff />} />
-          <Route path=":role/insurance" element={<InsuranceProviders />} />
-          <Route path=":role/facilities" element={<Facilities />} />
-          <Route path=":role/testing" element={<Testing />} />
+            {/* Doctor Routes */}
+            <Route path="doctor" element={<DoctorDashboard />} />
+            <Route path="doctor/my-patients" element={<MyPatients />} />
+            <Route path="doctor/consultations" element={<Consultations />} />
+            <Route path="doctor/lab-requests" element={<LabRequests />} />
+            <Route path="doctor/prescriptions" element={<Prescriptions />} />
+            <Route path="doctor/appointments" element={<Appointments />} />
+            <Route path="doctor/in-patient" element={<InPatient />} />
+            <Route path="doctor/logout" element={<Logout />} />
 
-          {/* Doctor */}
-          <Route path=":role/my-patients" element={<MyPatients />} />
-          <Route path=":role/consultations" element={<Consultations />} />
-          <Route path=":role/lab-requests" element={<LabRequests />} />
-          <Route path=":role/prescriptions" element={<Prescriptions />} />
-          <Route path=":role/appointments" element={<Appointments />} />
-          <Route path=":role/in-patient" element={<InPatient />} />
+            {/* Nurse Routes */}
+            <Route path="nurse" element={<NurseDashboard />} />
+            <Route path="nurse/pharmacy" element={<Pharmacy />} />
+            <Route path="nurse/admissions" element={<Admissions />} />
+            <Route path="nurse/patient-care" element={<PatientCare />} />
+            <Route path="nurse/discharge" element={<Discharge />} />
+            <Route path="nurse/reports" element={<Reports />} />
+            <Route path="nurse/logout" element={<Logout />} />
 
-          {/* Nurse */}
-          <Route path=":role/pharmacy" element={<Pharmacy />} />
-          <Route path=":role/admissions" element={<Admissions />} />
-          <Route path=":role/patient-care" element={<PatientCare />} />
-          <Route path=":role/discharge" element={<Discharge />} />
-          <Route path=":role/reports" element={<Reports />} />
 
-          {/* Lab */}
-          <Route path=":role/test-requests" element={<TestRequests />} />
-          <Route path=":role/processing" element={<Processing />} />
-          <Route path=":role/inventory" element={<Inventory />} />
-          <Route path=":role/tests" element={<Tests />} />
-          <Route path=":role/notifications" element={<Notifications />} />
+            {/* Reception Routes */}
+            <Route path="reception" element={<ReceptionDashboard />} />
+            <Route path="reception/register" element={<Register />} />
+            <Route path="reception/documents" element={<Documents />} />
+            <Route path="reception/donate" element={<Donate />} />
+            <Route path="reception/logout" element={<Logout />} />
 
-          {/* Reception */}
-          <Route path=":role/register" element={<Register />} />
-          <Route path=":role/documents" element={<Documents />} />
-          <Route path=":role/donate" element={<Donate />} />
+            {/* Checkout and Pharmacy Routes */}
+            <Route path="checkout" element={<CheckoutDashboard />} />
+            <Route path="checkout/payments" element={<Payments />} />
+            <Route path="checkout/services" element={<Services />} />
+            <Route path="checkout/logout" element={<Logout />} />
 
-          {/* Pharmacy */}
-          <Route path=":role/billing" element={<Billing />} />
+            {/* Pharmacy Dashboard */}
+            <Route path="pharmacy" element={<PharmacyDashboard />} />
+            <Route path="pharmacy/logout" element={<Logout />} />
+            <Route path="pharmacy/billing" element={<Billing />} />
 
-          {/* Checkout */}
-          <Route path=":role/payments" element={<Payments />} />
-          <Route path=":role/services" element={<Services />} />
-        </Route>
+            {/* Laboratory Routes */} 
+            <Route path="lab" element={<LabDashboard />} />
+            <Route path="lab/test-requests" element={<TestRequests />} />
+            <Route path="lab/processing" element={<Processing />} />
+            <Route path="lab/inventory" element={<Inventory />} />
+            <Route path="lab/tests" element={<Tests />} />
+            <Route path="lab/notifications" element={<Notifications />} />
+          </Route>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
 
-      <ToastContainer position="top-right" autoClose={3000} />
-    </>
+        <ToastContainer position="top-right" autoClose={3000} />
+      </>
+    
   );
 };
 

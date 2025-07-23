@@ -108,9 +108,9 @@ const ReceptionDashboard: React.FC = () => {
   return (
     <div className="dashboard-wrapper">
       <div className="overview-container">
-        <h3 className="overview-title">Doctor Dashboard</h3>
+        <h3 className="overview-title">Reception Dashboard</h3>
         <p className="overview-subtitle">
-          View patient stats, staff counts, insurance claims, and department details (Doctor view).
+          View patient registration, staff counts, insurance claims, and department details.
         </p>
         <div className="overview-cards-carousel" ref={carouselRef}>
           <div className="carousel-track">

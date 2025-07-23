@@ -36,7 +36,7 @@ const InsuranceProviders = () => {
   });
 
   const ACCESS_TOKEN = localStorage.getItem('access');
-  
+  console.log('Access Token:', ACCESS_TOKEN);
   useEffect(() => {
     const fetchProviders = async () => {
       try {
