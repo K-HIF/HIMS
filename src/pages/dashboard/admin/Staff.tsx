@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000/api/users/';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL||'http://127.0.0.1:8000';
 
 type ContextType = {
   searchTerm: string;
@@ -86,12 +86,12 @@ const Staff = () => {
     setLoading(true);
     try {
       const [doctors, nurses, pharmacies, labs, receptions, checkouts] = await Promise.all([
-        axios.get(`${BASE_URL}doctor/`),
-        axios.get(`${BASE_URL}nurse/`),
-        axios.get(`${BASE_URL}pharmacy/`),
-        axios.get(`${BASE_URL}lab/`),
-        axios.get(`${BASE_URL}reception/`),
-        axios.get(`${BASE_URL}finance/`),
+        axios.get(`${BASE_URL}/api/users/doctor/`),
+        axios.get(`${BASE_URL}/api/users/nurse/`),
+        axios.get(`${BASE_URL}/api/users/pharmacy/`),
+        axios.get(`${BASE_URL}/api/users/lab/`),
+        axios.get(`${BASE_URL}/api/users/reception/`),
+        axios.get(`${BASE_URL}/api/users/finance/`),
       ]);
 
       const allStaff = [
@@ -131,7 +131,7 @@ const Staff = () => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}departments/`);
+      const response = await axios.get(`${BASE_URL}/api/users/departments/`);
       setDepartments(response.data);
     } catch (err) {
       // Handle error silently, or consider adding user notification
@@ -201,7 +201,7 @@ const Staff = () => {
     try {
       
       const departmentName = editData.department;
-      const url = `${BASE_URL}${departmentName}/${editData.user_id}/`; 
+      const url = `${BASE_URL}/api/users/${departmentName}/${editData.user_id}/`; 
 
 
       if (isEditMode) {

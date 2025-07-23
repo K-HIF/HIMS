@@ -106,7 +106,7 @@ const MainBody: React.FC = () => {
       });
       const data = await res.json();
       localStorage.setItem("user", JSON.stringify(data.user));
-      console.log("User data:", data.user.department);
+     
       if (data.user.department !== department) {
         alert(`Login failed: Account doesn't have access to ${department} dashboard.`);
         return;
@@ -154,7 +154,7 @@ const MainBody: React.FC = () => {
       localStorage.setItem('user', JSON.stringify(data.user));
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
-      console.log("User data:", data.user.department);
+     
       navigate(`/dashboard/${data.user.department}`);
 
     } catch (err: any) {

@@ -23,3 +23,4 @@ if (rootElement) {
 } else {
   throw new Error("Root element with ID 'root' not found.");
 }
+

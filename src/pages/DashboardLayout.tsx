@@ -7,7 +7,7 @@ const DashboardLayout: React.FC<{ role?: string }> = ({ role }) => {
   const params = useParams();
   const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
   const currentRole = storedUser?.department?.toLowerCase() || role || params.role || 'admin';
-  console.log("Current role:", currentRole);
+  
   const [selectedPage, setSelectedPage] = useState('Dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

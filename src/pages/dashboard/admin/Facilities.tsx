@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL||'http://127.0.0.1:8000';
 const ACCESS_TOKEN = localStorage.getItem('access');
 
 type ContextType = {
@@ -33,6 +33,7 @@ const Facilities = () => {
     count: 0,
     occupied: 0,
   });
+  
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 640px)');

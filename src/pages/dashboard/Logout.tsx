@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 const Logout = () => {
   useEffect(() => {
     // Clear stored data
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
 
