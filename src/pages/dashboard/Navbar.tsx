@@ -246,7 +246,7 @@ const Navbar: React.FC<NavbarProps> = ({
             }`}
         >
           <ThumbsUp size={16} />
-          {loadingUpvote ? 'Voting...' : hasUpvoted ? '' : 'Upvote'}
+          {loadingUpvote ? 'Voting...' : hasUpvoted ? '' : ''}
         </button>
 
         <span className="text-gray-700 text-sm">{upvoteCount}</span>
