@@ -168,7 +168,7 @@ const Departments = () => {
             className="flex items-center gap-2 text-green-400 hover:text-green-200 font-medium"
           >
             <PlusCircle size={20} />
-            Add Department
+            Add New
           </button>
         </div>
       </div>
